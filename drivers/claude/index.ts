@@ -7,7 +7,9 @@ import type { Driver, Message, ToolSpec, Transport, TurnRequest, TurnResponse } 
 import { defineDriver, type DriverOptions } from '../../core/sdk.js';
 
 export const GATEWAY_BASE_URL = 'https://openrouter.ai/api';
-export const DEFAULT_MODELS = { native: 'claude-haiku-4-5-20251001', gateway: 'anthropic/claude-haiku-4.5' } as const;
+// Default: Claude Sonnet 5.5. Haiku 4.5 failed three paid greenfield runs (docs/decisions.md); Sonnet 5.5 is NOT
+// verified live (no budget left). Override with HARNESS_CLAUDE_MODEL.
+export const DEFAULT_MODELS = { native: 'claude-sonnet-5-5', gateway: 'anthropic/claude-sonnet-5.5' } as const;
 
 type Block = Anthropic.ContentBlockParam;
 

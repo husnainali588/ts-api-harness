@@ -20,6 +20,9 @@ Write one route module per resource: src/routes/<resource>.ts, default-exporting
 
 Schemas go in src/schemas/<thing>.ts (Zod; types via z.infer). Errors are thrown: NotFound, Conflict, ValidationProblem.
 Installed packages: express, zod, vitest, supertest only. Ids: randomUUID from 'node:crypto' (no uuid package).
+Use only helpers that exist: get_standard exports lists every exported name in src/ (e.g. pageOf, ListQuery,
+MemoryStore, defineRoute, NoContent, NotFound, Conflict). Do not invent others.
+
 List: query: ListQuery, responses: { 200: pageOf(Thing) }, body: store.page(query.cursor, query.limit).
 Delete: responses: { 204: NoContent }, return { status: 204 }.
 MemoryStore<T>: insert, get, replace(id, item), delete, find(predicate), page(cursor, limit).

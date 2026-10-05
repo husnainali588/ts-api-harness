@@ -46,8 +46,8 @@ const req: TurnRequest = {
 
 describe('claude driver', () => {
   it('picks the transport from env: native key first, then the gateway, else a clear error', () => {
-    expect(claudeConfig({ ANTHROPIC_API_KEY: 'n', OPENROUTER_API_KEY: 'g' })).toMatchObject({ transport: 'native', model: 'claude-haiku-4-5-20251001' });
-    expect(claudeConfig({ OPENROUTER_API_KEY: 'g' })).toMatchObject({ transport: 'gateway', model: 'anthropic/claude-haiku-4.5', baseURL: 'https://openrouter.ai/api' });
+    expect(claudeConfig({ ANTHROPIC_API_KEY: 'n', OPENROUTER_API_KEY: 'g' })).toMatchObject({ transport: 'native', model: 'claude-sonnet-5-5' });
+    expect(claudeConfig({ OPENROUTER_API_KEY: 'g' })).toMatchObject({ transport: 'gateway', model: 'anthropic/claude-sonnet-5.5', baseURL: 'https://openrouter.ai/api' });
     expect(claudeConfig({ OPENROUTER_API_KEY: 'g', HARNESS_CLAUDE_MODEL: 'anthropic/x' }).model).toBe('anthropic/x');
     expect(() => claude.create({ env: {} })).toThrow(/no key/);
   });
