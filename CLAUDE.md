@@ -1,8 +1,8 @@
 # CLAUDE.md — sf-harness assignment: TypeScript REST API harness
 
-Claude Code: read this whole file at the start of every session. The brief is `docs/assignment/brief.pdf`.
-If this file and the brief disagree, the brief wins — stop and tell me. Build phases are in
-`docs/BUILD_PROMPTS.md`; do exactly one phase at a time.
+Claude Code: read this whole file at the start of every session. The design as built is in `docs/design.md`
+(decisions in `docs/decisions.md`, build log in `docs/progress.md`). If this file and the design note disagree,
+stop and tell me.
 
 ---
 
@@ -481,7 +481,7 @@ unknown routes, body-parser errors on malformed JSON) — exactly where referenc
 
 ## 10. How you (Claude Code) work in this repo
 
-- One phase at a time from `docs/BUILD_PROMPTS.md`. Show a short plan before writing code in a new phase.
+- One change at a time; see `docs/design.md` for how the parts fit. Show a short plan before writing code.
 - Write the harness's own tests first, especially gate-bypass tests. Unit tests use the scripted driver and
   never call real provider APIs.
 - Before every commit: `npm test`, `npm run typecheck`, the leak test. Commit at the end of each phase with a

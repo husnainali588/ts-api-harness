@@ -1,6 +1,7 @@
 # progress.md — source of truth for the AUTORUN build
 
-Re-read `CLAUDE.md`, `docs/AUTORUN.md` and this file before each phase.
+Build log, kept as written during the build. The build instructions it refers to (AUTORUN, BUILD_PROMPTS, the
+assignment brief) were removed from the repository before submission; how the harness works is in `docs/design.md`.
 
 ## Phase 0b — own task files + sample API
 

@@ -4,7 +4,7 @@ An agent **harness** (not an agent) that governs TypeScript REST API work. A loo
 runs every tool call through **hooks** that can block, record or pass, fetches context **just in time**, and ends only
 when **deterministic checks** — never the model — say the work is done. It builds new APIs from a task file
 (greenfield) and makes scoped, contract-safe changes to existing ones (brownfield). Built for the sf-harness
-engineering assignment (`docs/assignment/brief.pdf`).
+engineering assignment; how it works is in [docs/design.md](docs/design.md).
 
 - **Core directory: `core/` — must stay untouched.** Every extension is a folder under `plugins/` or `drivers/`
   ([docs/extending.md](docs/extending.md)).
@@ -61,6 +61,9 @@ tolerates small format differences (YAML or JSON, `behaviors`, field lists or ma
 see `docs/decisions.md`).
 
 ## Evidence
+
+**Pull request opened by the harness:** [PR #2](https://github.com/husnainali588/ts-api-harness/pull/2) — shipped by
+the harness's own ship step (G4) after every gate was green, from a run with the scripted driver (see below).
 
 Honest summary (details and numbers in [docs/design.md §5](docs/design.md#5-honesty-boundary)):
 

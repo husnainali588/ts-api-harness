@@ -1,4 +1,7 @@
-# QUESTIONS.md — decisions made without asking (AUTORUN §3)
+# QUESTIONS.md — decisions made without asking during the unattended build
+
+Kept as written during the build; the build instructions referred to here (AUTORUN, BUILD_PROMPTS) were removed
+from the repository before submission. See `docs/design.md` for the harness itself.
 
 One line each: question → choice.
 
