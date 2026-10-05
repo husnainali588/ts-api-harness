@@ -43,6 +43,13 @@
 - Actual: ~220-token system prompt; first message = task brief + state card re-rendered every turn; tools return summaries (raw to `runs/<id>/raw/`); last 6 exchanges verbatim, older tool results become one-line stubs; large tool-call inputs (file content) elided from all but the latest exchange; unchanged re-reads return "unchanged since turn N".
 - Token report is computed only from the two runs' ledgers (`runs/<id>/tokens.json`); reductions use the aligned turns when the baseline is capped and say so in `note`; `bench` refuses a local (scripted) driver unless `--offline`, and such reports are marked `evidence: false`.
 
+## Brownfield (Phase 8)
+- Scope = files reachable from the target resource: seeds are src/ files whose path names the resource (plural or singular), plus their relative-import closure, plus tests that import any of them; new files are allowed only in a directory of a resource-named file. Shared modules the resource imports (e.g. problem.ts) are therefore in reach, unrelated modules are not.
+- Contract snapshot reads `createApp().routeTable` when present, otherwise static routes with their parsed and sent schemas imported by export name; JSON Schemas use `io: input` for requests and `io: output` for responses. Snapshots run in a fresh tsx subprocess like the probe.
+- Ratchet compares findings by rule + file + message (not line), so moving code is not a new finding; `task-coverage` is excluded (it is expected to change).
+- The existing suite's baseline results never count as red: only cases that fail after the model's own writes unlock source edits.
+- Scope enforcement moved from path-guard into its own hook, `scope-guard` (G1 extension), so path-guard stays about paths.
+
 ## Drivers (Phase 6) — checked against OpenRouter on 2026-10-05
 - OpenRouter Chat Completions: `https://openrouter.ai/api/v1/chat/completions`, `Authorization: Bearer <OPENROUTER_API_KEY>`; usage `prompt_tokens` (already includes cached tokens; `prompt_tokens_details.cached_tokens` is a subset), `completion_tokens`; `tools`/`tool_choice` in OpenAI shape.
 - OpenRouter Anthropic-compatible Messages endpoint: base URL `https://openrouter.ai/api` (SDK appends `/v1/messages`), auth `Authorization: Bearer <key>` (SDK `authToken`), model ids `anthropic/<model>`; usage `input_tokens` + `cache_creation_input_tokens` + `cache_read_input_tokens` (summed = full input), `output_tokens`.

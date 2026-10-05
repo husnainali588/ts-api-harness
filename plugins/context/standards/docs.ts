@@ -25,6 +25,15 @@ MemoryStore<T>: insert, get, replace(id, item), delete, find(predicate), page(cu
 Tests: test/routes/<resource>.test.ts importing createApp from '../../src/app.js' and thingsRoutes from
 '../../src/routes/<resource>.js' (createApp(thingsRoutes()) gives a fresh store per test); supertest for HTTP.`,
 
+  brownfield: `# Changing an existing API
+1. propose_scope({ files, reason }) before any write: the files you will touch, tests included (new files must sit beside
+   files of the target resource). Writes outside the accepted scope are blocked; propose again to widen it.
+2. Keep the contract: never remove a route, response status or response field, never narrow a type, never add a
+   required request field or remove an enum value. New optional fields are fine (they are listed in the PR).
+3. Follow the code's existing style (parse inputs with its schemas, send schema-parsed responses, throw its errors).
+4. Same observed-red rule: extend the mapped test first, run_tests to see it fail, then change the source.
+5. Finish also checks: no new standards findings anywhere, touched files fully clean, no breaking contract change.`,
+
   tdd: `# Observed red (how writes are allowed)
 A file under src/ can be written only after a mapped test failed under run_tests.
 Mapped = a test that imports the file, or the same path under test/ with .test.ts.

@@ -3,7 +3,7 @@
 import pluralize from 'pluralize';
 import { Node, SyntaxKind } from 'ts-morph';
 import { defineRule, type RuleFailure } from '../../../core/sdk.js';
-import { allRoutes, getProp, isItemPath, schemaParsing, srcText, zodObjectKeys, type RouteSite } from '../_shared/api.js';
+import { allRoutes, getProp, isItemPath, schemaParsing, srcText, zodObjectKeys, type RouteSite } from '../../../core/analysis.js';
 
 const fail = (route: RouteSite, message: string, fix: string): RuleFailure => ({ line: route.line, col: route.col, message, fix });
 const handlerText = (route: RouteSite) => route.handlers.map((h) => h.getText()).join('\n');

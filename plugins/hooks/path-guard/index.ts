@@ -65,21 +65,6 @@ export default defineHook({
           fix: 'Leave config as it is; use add_dependency for packages and change source or test files instead.',
         };
       }
-      const scope = ctx.state.acceptedScope;
-      if (writes && ctx.task.mode === 'brownfield' && scope === null) {
-        return {
-          decision: 'block',
-          reason: `no scope accepted yet for this change to an existing API.`,
-          fix: 'Call propose_scope with the files you need to change and a reason, then retry.',
-        };
-      }
-      if (writes && scope !== null && !scope.map((s) => s.toLowerCase()).includes(rel)) {
-        return {
-          decision: 'block',
-          reason: `${path} is outside the accepted scope (${scope.join(', ') || 'empty'}).`,
-          fix: 'Call propose_scope with this file and a reason, then retry.',
-        };
-      }
     }
     return { decision: 'pass' };
   },

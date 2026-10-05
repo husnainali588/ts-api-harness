@@ -60,8 +60,8 @@ const BLOCKED: [string, { name: string; input: unknown }, string?][] = [
   ['NUL byte', call('write_file', { path: 'src/a\u0000.ts', content: 'x' })],
   ['write through a symlink that leads out', call('write_file', { path: 'escape/evil.ts', content: 'x' }), 'tasks/orders-add-field.yaml'],
   ['read through a symlink that leads out', call('read_file', { path: 'escape/secret.txt' }), 'tasks/orders-add-field.yaml'],
-  ['brownfield write before propose_scope', call('write_file', { path: 'src/orders/notes.ts', content: 'x' }), 'tasks/orders-add-field.yaml'],
 ];
+// Brownfield scope (writes before propose_scope / outside the accepted scope) is the scope-guard hook: test/brownfield.test.ts.
 
 describe('G1 blocks bypass attempts', () => {
   it.each(BLOCKED)('%s', async (_name, toolCall, taskPath) => {

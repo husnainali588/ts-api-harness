@@ -7,24 +7,11 @@ import { createRequire } from 'node:module';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
-export interface SchemaRef {
-  file: string; // API-root-relative module
-  name: string; // export name
-}
-
-export interface AstRoute {
-  method: string;
-  path: string;
-  line: number;
-  file: string;
-  params?: SchemaRef;
-  query?: SchemaRef;
-  body?: SchemaRef;
-}
+import type { RouteRefs, SchemaRef } from '../../../core/analysis.js';
 
 export interface ProbeInput {
   apiRoot: string;
-  astRoutes: AstRoute[];
+  astRoutes: RouteRefs[];
   uniqueFields: string[];
   outFile: string;
 }

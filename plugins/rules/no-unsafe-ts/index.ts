@@ -2,7 +2,7 @@
 // checked in src/ and test/; expressions the type checker types as `any` are checked in src/.
 import { Node, SyntaxKind, TypeFlags } from 'ts-morph';
 import { defineRule, type RuleFailure } from '../../../core/sdk.js';
-import { isSrcPath, loc } from '../_shared/api.js';
+import { isSrcPath, loc } from '../../../core/analysis.js';
 
 const DIRECTIVE = /(\/\/|\/\*)\s*(@ts-ignore|@ts-nocheck|@ts-expect-error|eslint-disable)/;
 

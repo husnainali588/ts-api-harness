@@ -1,5 +1,5 @@
-// Shared static analysis for the standards rules: route discovery (template `defineRoute` and hand-written
-// Express routers), schema key resolution and small AST helpers. Folders starting with "_" are not plugins.
+// Static API analysis shared by the standards rules and the brownfield contract gate: route discovery (template
+// `defineRoute` and hand-written Express routers), schema key resolution and small AST helpers.
 import { Node, SyntaxKind, type CallExpression, type ObjectLiteralExpression, type Project, type SourceFile } from 'ts-morph';
 
 export const METHODS = ['get', 'post', 'put', 'patch', 'delete'] as const;
@@ -219,6 +219,77 @@ export function allRoutes(project: Project, apiRoot: string): RouteSite[] {
   }
   routeCache.set(project, routes);
   return routes;
+}
+
+// ── schema references (for booting tools: the probe and the contract snapshot) ───────────────────────
+
+export interface SchemaRef {
+  file: string; // API-root-relative module
+  name: string; // export name
+}
+
+export interface RouteRefs {
+  method: string;
+  path: string;
+  line: number;
+  file: string;
+  params?: SchemaRef;
+  query?: SchemaRef;
+  body?: SchemaRef;
+  /** status → response schema (null = no body, e.g. 204). */
+  responses: Record<string, SchemaRef | null>;
+}
+
+function exportedRef(node: Node | undefined, apiRoot: string): SchemaRef | undefined {
+  if (node === undefined || !Node.isIdentifier(node)) return undefined;
+  const decl = declarationOf(node);
+  if (decl === undefined || !Node.isVariableDeclaration(decl) || !decl.isExported()) return undefined;
+  return { file: rel(apiRoot, decl.getSourceFile()), name: decl.getName() };
+}
+
+/** Status set earlier in a fluent chain ending at `call` (res.status(201).location(x).json(y) → 201). */
+function chainStatus(call: CallExpression): number | 'dynamic' | undefined {
+  let cur: Node = call.getExpression();
+  while (Node.isPropertyAccessExpression(cur)) {
+    const inner = cur.getExpression();
+    if (!Node.isCallExpression(inner)) return undefined;
+    const callee = inner.getExpression();
+    if (Node.isPropertyAccessExpression(callee) && callee.getName() === 'status') return numberValue(inner.getArguments()[0]) ?? 'dynamic';
+    cur = callee;
+  }
+  return undefined;
+}
+
+/** Schema references of a hand-written route: what its handlers parse and what they send. */
+export function routeRefs(route: RouteSite, apiRoot: string): RouteRefs {
+  const out: RouteRefs = { method: route.method, path: route.path, line: route.line, file: route.file, responses: {} };
+  for (const fn of route.handlers) {
+    const req = firstParamName(fn);
+    for (const access of fn.getDescendantsOfKind(SyntaxKind.PropertyAccessExpression)) {
+      const source = access.getName();
+      if (req === undefined || access.getExpression().getText() !== req || (source !== 'body' && source !== 'query' && source !== 'params')) continue;
+      const ref = exportedRef(schemaParsing(access), apiRoot);
+      if (ref !== undefined) out[source] = ref;
+    }
+    for (const call of fn.getDescendantsOfKind(SyntaxKind.CallExpression)) {
+      const callee = call.getExpression();
+      if (!Node.isPropertyAccessExpression(callee)) continue;
+      const name = callee.getName();
+      const chained = chainStatus(call);
+      if (chained === 'dynamic') continue; // e.g. an idempotent replay of an earlier response
+      if (name === 'end' && chained !== undefined) out.responses[String(chained)] = null;
+      if (name !== 'json' && name !== 'send') continue;
+      const status = String(chained ?? 200);
+      const arg = call.getArguments()[0];
+      const value = Node.isIdentifier(arg) ? resolveValue(arg) : arg;
+      if (value !== undefined && Node.isCallExpression(value) && isParseCall(value)) {
+        const parseCallee = value.getExpression();
+        const ref = Node.isPropertyAccessExpression(parseCallee) ? exportedRef(parseCallee.getExpression(), apiRoot) : undefined;
+        if (ref !== undefined && !(status in out.responses)) out.responses[status] = ref;
+      }
+    }
+  }
+  return out;
 }
 
 export const pathParams = (path: string) => path.split('/').filter((s) => s.startsWith(':')).map((s) => s.slice(1));

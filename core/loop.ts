@@ -9,7 +9,8 @@ import { compactReport, runChecks } from './checks.js';
 import { Context } from './context.js';
 import { estimateRequestTokens, type ToolCall, type ToolResult, type ToolSpec, type TurnResponse } from './driver.js';
 import { execTool } from './exec.js';
-import { finishGate } from './finish.js';
+import { brownfieldGate, proposeScope, snapshotBefore } from './brownfield.js';
+import { finishGate as runFinishGate, type ExtraGate } from './finish.js';
 import { blockMessage, runHooks } from './hooks.js';
 import { findDriver, loadRegistry, type Registry } from './registry.js';
 import type { HarnessServices, HookContext, ToolContext, ToolDefinition, ToolOutput } from './sdk.js';
@@ -88,8 +89,6 @@ export function newRunId(): string {
   return `${stamp}-${randomBytes(3).toString('hex')}`;
 }
 
-const notAvailable = (what: string): Promise<ToolOutput> =>
-  Promise.resolve({ summary: `${what} is not available in this harness build.`, isError: true });
 
 export function harnessRunDir(run: RunContext): string {
   return join(run.repoRoot, '.harness', 'runs', run.runId);
@@ -117,10 +116,8 @@ const defaultServices = (run: RunContext): HarnessServices => ({
     run.state.lastCheck = `verdict ${report.verdictPct}%${report.green ? '' : ` — failing: ${report.rules.filter((r) => r.required && (r.status === 'fail' || r.status === 'unproven')).map((r) => r.id).join(', ')}`}`;
     return { summary, raw: report.text };
   },
-  proposeScope: () => notAvailable('propose_scope'),
+  proposeScope: (files, reason) => Promise.resolve(proposeScope(run, files, reason)),
 });
-
-const defaultGate = (run: RunContext): Promise<GateResult> => finishGate(run);
 
 function stubFor(call: ToolCall): string {
   const input = JSON.stringify(call.input) ?? '';
@@ -190,7 +187,16 @@ export async function runHarness(opts: RunOptions): Promise<RunSummary> {
   state.testMap = (source) => mappedTests(workspace.apiRoot, source);
   const run: RunContext = { runId, task, registry, workspace, state, evidence, harnessRoot: opts.harnessRoot, repoRoot: opts.repoRoot, turn: 0 };
   const services = (opts.services ?? defaultServices)(run);
-  const finishGate = opts.finishGate ?? defaultGate;
+
+  // Brownfield: green baseline + before-snapshots, then the ratchet and contract gate join G3.
+  let stopBeforeStart: string | undefined;
+  let extraGates: ExtraGate[] = [];
+  if (task.mode === 'brownfield') {
+    const snap = await snapshotBefore(run);
+    if ('stop' in snap) stopBeforeStart = snap.stop;
+    else extraGates = [brownfieldGate(snap.before)];
+  }
+  const finishGate = opts.finishGate ?? ((r: RunContext) => runFinishGate(r, extraGates));
   const ledger = new TokenLedger();
   const tools = registry.tools.map((t) => t.def);
   const specs = toolSpecs(tools);
@@ -291,10 +297,10 @@ export async function runHarness(opts: RunOptions): Promise<RunSummary> {
   }
 
   let status: RunStatus = 'unproven';
-  let reason = `turn budget exhausted (${maxTurns} turns)`;
+  let reason = stopBeforeStart ?? `turn budget exhausted (${maxTurns} turns)`;
   let gate: GateResult | null = null;
   let consecutiveBlocks = 0;
-  loop: for (run.turn = 1; run.turn <= maxTurns; run.turn += 1) {
+  loop: for (run.turn = 1; run.turn <= (stopBeforeStart === undefined ? maxTurns : 0); run.turn += 1) {
     if (baseline) context.setFrontLoad(await buildFrontLoad());
     const request = { system: context.system(), messages: context.render(run.turn), tools: specs, maxOutputTokens: opts.maxOutputTokens ?? 8192 };
     if (!baseline) mechanisms.historyStubs = Math.max(mechanisms.historyStubs, context.stubbedResults());

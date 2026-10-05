@@ -4,37 +4,12 @@ import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { randomUUID } from 'node:crypto';
-import { Node, SyntaxKind } from 'ts-morph';
-import { defineRule, type ProjectFileResult, type RuleContext } from '../../../core/sdk.js';
-import { allRoutes, firstParamName, rel, schemaParsing, type RouteSite } from '../_shared/api.js';
-import type { AstRoute, ProbeInput, ProbeOutput, SchemaRef } from './runner.js';
+import { defineRule, type ProjectFileResult } from '../../../core/sdk.js';
+import { allRoutes, routeRefs } from '../../../core/analysis.js';
+import type { ProbeInput, ProbeOutput } from './runner.js';
 
 const RUNNER = fileURLToPath(new URL('./runner.ts', import.meta.url));
 const WORK_DIR = fileURLToPath(new URL('../../../.harness/probe/', import.meta.url));
-
-function exportedRef(node: Node | undefined, ctx: RuleContext): SchemaRef | undefined {
-  if (node === undefined || !Node.isIdentifier(node)) return undefined;
-  let symbol = node.getSymbol();
-  const aliased = symbol?.getAliasedSymbol();
-  if (aliased !== undefined) symbol = aliased;
-  const decl = symbol?.getDeclarations()[0];
-  if (decl === undefined || !Node.isVariableDeclaration(decl) || !decl.isExported()) return undefined;
-  return { file: rel(ctx.apiRoot, decl.getSourceFile()), name: decl.getName() };
-}
-
-function astRoute(route: RouteSite, ctx: RuleContext): AstRoute {
-  const out: AstRoute = { method: route.method, path: route.path, line: route.line, file: route.file };
-  for (const fn of route.handlers) {
-    const req = firstParamName(fn);
-    for (const access of fn.getDescendantsOfKind(SyntaxKind.PropertyAccessExpression)) {
-      const source = access.getName();
-      if (req === undefined || access.getExpression().getText() !== req || (source !== 'body' && source !== 'query' && source !== 'params')) continue;
-      const ref = exportedRef(schemaParsing(access), ctx);
-      if (ref !== undefined) out[source] = ref;
-    }
-  }
-  return out;
-}
 
 export default defineRule({
   id: 'problem-probe',
@@ -47,7 +22,7 @@ export default defineRule({
     const id = randomUUID();
     const input: ProbeInput = {
       apiRoot: ctx.apiRoot,
-      astRoutes: allRoutes(ctx.project, ctx.apiRoot).map((r) => astRoute(r, ctx)),
+      astRoutes: allRoutes(ctx.project, ctx.apiRoot).map((r) => routeRefs(r, ctx.apiRoot)),
       uniqueFields: (ctx.task?.fields ?? []).filter((f) => f.unique).map((f) => f.name),
       outFile: join(WORK_DIR, `${id}.out.json`),
     };

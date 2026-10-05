@@ -1,6 +1,6 @@
 // Every source file has a mapped test (an importing test or test/x/y.test.ts); no .skip, .only or .todo anywhere.
 import { defineRule, type RuleFailure } from '../../../core/sdk.js';
-import { isSrcPath, isTestPath } from '../_shared/api.js';
+import { isSrcPath, isTestPath } from '../../../core/analysis.js';
 
 const FOCUS_OR_SKIP = /\b(it|test|describe|suite|bench)\.(skip|only|todo|skipIf|runIf|fails)\b|\b(xit|xtest|xdescribe|fit|fdescribe)\s*\(/;
 

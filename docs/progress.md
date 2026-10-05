@@ -178,3 +178,20 @@ Result: DONE with an open finding — commit `fa489dd`.
 - Offline estimate (chars/4, not evidence): 80.3% mean per turn over aligned turns 1–8; 82.3% over the full 14-turn
   script. Eaten by ~1.2k fixed tokens per turn on both sides (tools, prompt, brief) while early history is the same on
   both sides; trimmed tool definitions and schema noise; window kept at 6 (QUESTIONS.md).
+
+## Phase 8 — brownfield
+
+Plan:
+1. Run start (brownfield): existing tests must be green (else UNPROVEN "baseline red", no turns); snapshot
+   contract.before.json (route table + request/response JSON Schemas, via a fresh tsx subprocess), findings.before.json,
+   map.json into `.harness/runs/<id>/`.
+2. Tool `propose_scope({ files, reason })`: accepts files reachable from the task's resource in the import graph (plus
+   their tests) or new files beside them; rejects others with the allowed list. Hook `scope-guard` enforces it.
+3. Finish additions: ratchet (no new findings vs before, touched files clean) and contract gate (no removed
+   route/field/status, narrowed type, new required request field, removed enum value); additive changes recorded.
+4. Tests: response field removed → contract FAIL; new finding in an untouched file → ratchet FAIL; out-of-scope write
+   blocked; an honest scripted change (optional `notes`) ends with G3 green.
+
+Result: DONE — commit "feat(core): brownfield scope, ratchet and contract gates".
+- Moved shared route analysis to core/analysis.ts (used by rules and by the contract gate); probe uses routeRefs.
+- Tests: 20 files / 160 tests passed; typecheck clean; leak test green.

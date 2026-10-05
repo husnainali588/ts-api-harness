@@ -15,7 +15,7 @@ import {
   pathParams,
   resolveValue,
   type RouteSite,
-} from '../_shared/api.js';
+} from '../../../core/analysis.js';
 
 const fail = (node: Node, message: string, fix: string): RuleFailure => ({ ...loc(node), message, fix });
 

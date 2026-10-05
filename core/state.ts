@@ -19,6 +19,8 @@ export class RunState implements RunStateView {
   readonly openBlocks: string[] = [];
   lastTest: string | undefined;
   lastCheck: string | undefined;
+  /** Brownfield: breaking/additive contract changes from the last finish gate (additive ones go into the PR body). */
+  contractChanges: { breaking: string[]; additive: string[] } | undefined;
   /** Per-tool scratch memory (e.g. read_file's unchanged-reread cache). */
   readonly memory = new Map<string, Map<string, unknown>>();
   /** Source → mapped test files; filled by the test-map builder. */

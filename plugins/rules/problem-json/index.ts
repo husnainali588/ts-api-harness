@@ -2,7 +2,7 @@
 // status, detail and instance; no ad-hoc { error } bodies; 404 catch-all, malformed-body and fallback handlers exist.
 import { Node, SyntaxKind, type CallExpression, type ClassDeclaration, type SourceFile } from 'ts-morph';
 import { defineRule, type RuleFailure, type RuleContext } from '../../../core/sdk.js';
-import { declaredSchemas, functionLike, isParseCall, loc, numberValue, paramCount, stringValue } from '../_shared/api.js';
+import { declaredSchemas, functionLike, isParseCall, loc, numberValue, paramCount, stringValue } from '../../../core/analysis.js';
 
 const PROBLEM_KEYS = ['type', 'title', 'status', 'detail', 'instance'];
 

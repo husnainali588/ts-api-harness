@@ -1,7 +1,7 @@
 // The API actually does what the task asks: greenfield → the routes its behaviours name exist for the resource;
 // brownfield → every task field appears in a request/response schema. n/a when no task is given.
 import { defineRule, type RuleFailure } from '../../../core/sdk.js';
-import { allRoutes, declaredSchemas, isItemPath, type Method } from '../_shared/api.js';
+import { allRoutes, declaredSchemas, isItemPath, type Method } from '../../../core/analysis.js';
 
 const VERBS: { pattern: RegExp; label: string; method: Method[]; item: boolean }[] = [
   { pattern: /\bcreat/i, label: 'create', method: ['post'], item: false },

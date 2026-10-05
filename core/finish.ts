@@ -1,12 +1,12 @@
 // G3 — the finish gate (spec §6). Only this ends a run green: full suite green via the harness runner, every test
 // case ever seen red still exists and passes, strict tsc clean and the standards checks at 100% with nothing unproven.
-import { compactReport, runChecks } from './checks.js';
+import { compactReport, runChecks, type CheckReport } from './checks.js';
 import type { GateResult, RunContext } from './loop.js';
 import type { TestCaseObservation } from './sdk.js';
 import { LOAD_CASE, runTests } from './tests.js';
 import { join } from 'node:path';
 
-export type ExtraGate = (run: RunContext) => Promise<GateResult>;
+export type ExtraGate = (run: RunContext, report: CheckReport) => Promise<GateResult>;
 
 /** Continuity: every red case is still there, not skipped, and passing now. */
 export function continuity(red: readonly { file: string; name: string; turn: number }[], latest: readonly TestCaseObservation[]): string[] {
@@ -86,7 +86,7 @@ export async function finishGate(run: RunContext, extra: ExtraGate[] = []): Prom
   }
 
   for (const gate of extra) {
-    const result = await gate(run);
+    const result = await gate(run, report);
     lines.push(...result.lines);
     unproven.push(...result.unproven);
     if (!result.green) green = false;
