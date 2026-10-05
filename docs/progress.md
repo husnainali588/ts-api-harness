@@ -263,3 +263,12 @@ Result: DONE — commit "fix(gates): red-team fixes".
   test/, code under src/, .ts only), path-guard (template-owned files in greenfield), zod-boundary (computed paths),
   no-unsafe-ts (double assertions). No core file changed.
 - Tests: 23 files / 182 tests passed; typecheck clean; leak test green; good-api, sample API, template still 100%.
+
+## Phase 12 — evidence, grader simulation, design note
+
+Plan:
+1. Paid runs, each once, in order, with `--max-run-tokens 150000 --total-budget 650000`: greenfield claude --ship;
+   greenfield openai; brownfield (claude) --ship; `bench --baseline-turns 8 --actual-run <greenfield claude runId>`.
+   After each: run id, model, tokens, ledger, cost here. Failure → diagnose by replay, fix, STOP and ask before re-run.
+2. Commit evidence (runs/, reports/, tokens/ of those runs; the generated API to generated/users-api).
+3. scripts/grade.sh offline must pass; docs/design.md with numbers copied from harness-written files; README evidence.
