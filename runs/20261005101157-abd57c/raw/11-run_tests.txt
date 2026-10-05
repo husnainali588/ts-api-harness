@@ -1,0 +1,11 @@
+test/app.test.ts › (file failed to load)
+PaginatedList is not a function
+
+test/routes/index.test.ts › (file failed to load)
+PaginatedList is not a function
+
+test/routes/users.test.ts › (file failed to load)
+PaginatedList is not a function
+
+--- vitest stderr ---
+Command failed: /opt/homebrew/Cellar/node/26.10.0_1/bin/node /Users/husnainali/Claude Code/AGENT HARNESS/.harness/worktrees/20261005101157-abd57c/generated/users-api/node_modules/vitest/vitest.mjs run --reporter=json --outputFile=/Users/husnainali/Claude Code/AGENT HARNESS/.harness/runs/20261005101157-abd57c/vitest-23-1791195186656.json --passWithNoTests

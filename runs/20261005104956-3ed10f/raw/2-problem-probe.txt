@@ -1,0 +1,334 @@
+{
+  "source": "ast",
+  "probes": [
+    {
+      "family": "unknown-route",
+      "route": "app",
+      "request": "GET /v1/probe-unknown-route-7608d6fe",
+      "status": 404,
+      "contentType": "application/problem+json; charset=utf-8",
+      "body": "{\"type\":\"https://api.sf/problems/not-found\",\"title\":\"Route not found\",\"status\":404,\"detail\":\"No route for GET /v1/probe-unknown-route-7608d6fe\",\"instance\":\"/v1/probe-unknown-route-7608d6fe\"}",
+      "allowed": [
+        404
+      ],
+      "problems": []
+    },
+    {
+      "family": "malformed-json",
+      "route": "POST /v1/orders",
+      "request": "POST /v1/orders body={\"probe\":",
+      "status": 400,
+      "contentType": "application/problem+json; charset=utf-8",
+      "body": "{\"type\":\"https://api.sf/problems/malformed-json\",\"title\":\"Malformed JSON body\",\"status\":400,\"detail\":\"The request body is not valid JSON.\",\"instance\":\"/v1/orders\"}",
+      "allowed": [
+        400
+      ],
+      "problems": []
+    },
+    {
+      "family": "empty-body",
+      "route": "POST /v1/orders",
+      "request": "POST /v1/orders",
+      "status": 422,
+      "contentType": "application/problem+json; charset=utf-8",
+      "body": "{\"type\":\"https://api.sf/problems/validation\",\"title\":\"Request body failed validation\",\"status\":422,\"detail\":\"(root): Invalid input: expected object, received undefined\",\"instance\":\"/v1/orders\"}",
+      "allowed": [
+        400,
+        422
+      ],
+      "problems": []
+    },
+    {
+      "family": "missing-field",
+      "route": "POST /v1/orders",
+      "request": "POST /v1/orders json={\"amountCents\":1,\"currency\":\"USD\"}",
+      "status": 422,
+      "contentType": "application/problem+json; charset=utf-8",
+      "body": "{\"type\":\"https://api.sf/problems/validation\",\"title\":\"Request body failed validation\",\"status\":422,\"detail\":\"customerEmail: Invalid input: expected string, received undefined\",\"instance\":\"/v1/orders\"}",
+      "allowed": [
+        422
+      ],
+      "problems": []
+    },
+    {
+      "family": "missing-field",
+      "route": "POST /v1/orders",
+      "request": "POST /v1/orders json={\"customerEmail\":\"probe7.1791197405636@example.com\",\"currency\":\"USD\"}",
+      "status": 422,
+      "contentType": "application/problem+json; charset=utf-8",
+      "body": "{\"type\":\"https://api.sf/problems/validation\",\"title\":\"Request body failed validation\",\"status\":422,\"detail\":\"amountCents: Invalid input: expected number, received undefined\",\"instance\":\"/v1/orders\"}",
+      "allowed": [
+        422
+      ],
+      "problems": []
+    },
+    {
+      "family": "missing-field",
+      "route": "POST /v1/orders",
+      "request": "POST /v1/orders json={\"customerEmail\":\"probe10.1791197405636@example.com\",\"amountCents\":1}",
+      "status": 422,
+      "contentType": "application/problem+json; charset=utf-8",
+      "body": "{\"type\":\"https://api.sf/problems/validation\",\"title\":\"Request body failed validation\",\"status\":422,\"detail\":\"currency: Invalid option: expected one of \\\"USD\\\"|\\\"EUR\\\"|\\\"GBP\\\"\",\"instance\":\"/v1/orders\"}",
+      "allowed": [
+        422
+      ],
+      "problems": []
+    },
+    {
+      "family": "wrong-type",
+      "route": "POST /v1/orders",
+      "request": "POST /v1/orders json={\"customerEmail\":12345,\"amountCents\":1,\"currency\":\"USD\"}",
+      "status": 422,
+      "contentType": "application/problem+json; charset=utf-8",
+      "body": "{\"type\":\"https://api.sf/problems/validation\",\"title\":\"Request body failed validation\",\"status\":422,\"detail\":\"customerEmail: Invalid input: expected string, received number\",\"instance\":\"/v1/orders\"}",
+      "allowed": [
+        422
+      ],
+      "problems": []
+    },
+    {
+      "family": "wrong-type",
+      "route": "POST /v1/orders",
+      "request": "POST /v1/orders json={\"customerEmail\":\"probe16.1791197405638@example.com\",\"amountCents\":\"not-a-number\",\"currency\":\"USD\"}",
+      "status": 422,
+      "contentType": "application/problem+json; charset=utf-8",
+      "body": "{\"type\":\"https://api.sf/problems/validation\",\"title\":\"Request body failed validation\",\"status\":422,\"detail\":\"amountCents: Invalid input: expected number, received string\",\"instance\":\"/v1/orders\"}",
+      "allowed": [
+        422
+      ],
+      "problems": []
+    },
+    {
+      "family": "wrong-type",
+      "route": "POST /v1/orders",
+      "request": "POST /v1/orders json={\"customerEmail\":\"probe19.1791197405638@example.com\",\"amountCents\":1,\"currency\":12345}",
+      "status": 422,
+      "contentType": "application/problem+json; charset=utf-8",
+      "body": "{\"type\":\"https://api.sf/problems/validation\",\"title\":\"Request body failed validation\",\"status\":422,\"detail\":\"currency: Invalid option: expected one of \\\"USD\\\"|\\\"EUR\\\"|\\\"GBP\\\"\",\"instance\":\"/v1/orders\"}",
+      "allowed": [
+        422
+      ],
+      "problems": []
+    },
+    {
+      "family": "wrong-type",
+      "route": "POST /v1/orders",
+      "request": "POST /v1/orders json={\"customerEmail\":\"probe22.1791197405639@example.com\",\"amountCents\":1,\"currency\":\"USD\",\"notes\":12345}",
+      "status": 422,
+      "contentType": "application/problem+json; charset=utf-8",
+      "body": "{\"type\":\"https://api.sf/problems/validation\",\"title\":\"Request body failed validation\",\"status\":422,\"detail\":\"notes: Invalid input: expected string, received number\",\"instance\":\"/v1/orders\"}",
+      "allowed": [
+        422
+      ],
+      "problems": []
+    },
+    {
+      "family": "wrong-method",
+      "route": "POST /v1/orders",
+      "request": "PUT /v1/orders",
+      "status": 404,
+      "contentType": "application/problem+json; charset=utf-8",
+      "body": "{\"type\":\"https://api.sf/problems/not-found\",\"title\":\"Route not found\",\"status\":404,\"detail\":\"No route for PUT /v1/orders\",\"instance\":\"/v1/orders\"}",
+      "allowed": [
+        404,
+        405
+      ],
+      "problems": []
+    },
+    {
+      "family": "idempotency",
+      "route": "POST /v1/orders",
+      "request": "POST /v1/orders json={\"customerEmail\":\"probe25.1791197405640@example.com\",\"amountCents\":1,\"currency\":\"USD\"}",
+      "status": 201,
+      "contentType": "application/json; charset=utf-8",
+      "body": "{\"id\":\"449290d4-cbaa-4707-847e-01825f3095f5\",\"customerEmail\":\"probe25.1791197405640@example.com\",\"amountCents\":1,\"currency\":\"USD\",\"status\":\"pending\",\"createdAt\":\"2026-10-05T10:50:05.640Z\"}",
+      "allowed": [
+        200,
+        201
+      ],
+      "problems": []
+    },
+    {
+      "family": "idempotency",
+      "route": "POST /v1/orders",
+      "request": "POST /v1/orders json={\"customerEmail\":\"probe25.1791197405640@example.com\",\"amountCents\":1,\"currency\":\"USD\"}",
+      "status": 201,
+      "contentType": "application/json; charset=utf-8",
+      "body": "{\"id\":\"449290d4-cbaa-4707-847e-01825f3095f5\",\"customerEmail\":\"probe25.1791197405640@example.com\",\"amountCents\":1,\"currency\":\"USD\",\"status\":\"pending\",\"createdAt\":\"2026-10-05T10:50:05.640Z\"}",
+      "allowed": [
+        201
+      ],
+      "problems": []
+    },
+    {
+      "family": "idempotency",
+      "route": "POST /v1/orders",
+      "request": "POST /v1/orders json={\"customerEmail\":\"probe28.1791197405642@example.com\",\"amountCents\":1,\"currency\":\"USD\"}",
+      "status": 409,
+      "contentType": "application/problem+json; charset=utf-8",
+      "body": "{\"type\":\"https://api.sf/problems/conflict\",\"title\":\"Conflict\",\"status\":409,\"detail\":\"Idempotency-Key was already used with a different request body.\",\"instance\":\"/v1/orders\"}",
+      "allowed": [
+        409
+      ],
+      "problems": []
+    },
+    {
+      "family": "list-bounds",
+      "route": "GET /v1/orders",
+      "request": "GET /v1/orders?limit=0",
+      "status": 422,
+      "contentType": "application/problem+json; charset=utf-8",
+      "body": "{\"type\":\"https://api.sf/problems/validation\",\"title\":\"Query parameters failed validation\",\"status\":422,\"detail\":\"limit: Too small: expected number to be >=1\",\"instance\":\"/v1/orders\"}",
+      "allowed": [
+        400,
+        422
+      ],
+      "problems": []
+    },
+    {
+      "family": "list-bounds",
+      "route": "GET /v1/orders",
+      "request": "GET /v1/orders?limit=10000",
+      "status": 422,
+      "contentType": "application/problem+json; charset=utf-8",
+      "body": "{\"type\":\"https://api.sf/problems/validation\",\"title\":\"Query parameters failed validation\",\"status\":422,\"detail\":\"limit: Too big: expected number to be <=100\",\"instance\":\"/v1/orders\"}",
+      "allowed": [
+        400,
+        422
+      ],
+      "problems": []
+    },
+    {
+      "family": "list-bounds",
+      "route": "GET /v1/orders",
+      "request": "GET /v1/orders?cursor=garbage!%40%23",
+      "status": 422,
+      "contentType": "application/problem+json; charset=utf-8",
+      "body": "{\"type\":\"https://api.sf/problems/validation\",\"title\":\"Query parameters failed validation\",\"status\":422,\"detail\":\"cursor: Invalid cursor\",\"instance\":\"/v1/orders\"}",
+      "allowed": [
+        400,
+        422
+      ],
+      "problems": []
+    },
+    {
+      "family": "malformed-id",
+      "route": "GET /v1/orders/:id",
+      "request": "GET /v1/orders/not%20a%20valid%20id%21",
+      "status": 422,
+      "contentType": "application/problem+json; charset=utf-8",
+      "body": "{\"type\":\"https://api.sf/problems/validation\",\"title\":\"Path parameters failed validation\",\"status\":422,\"detail\":\"id: Invalid UUID\",\"instance\":\"/v1/orders/not%20a%20valid%20id%21\"}",
+      "allowed": [
+        400,
+        404,
+        422
+      ],
+      "problems": []
+    },
+    {
+      "family": "unknown-id",
+      "route": "GET /v1/orders/:id",
+      "request": "GET /v1/orders/0f7de3d3-e091-4397-bdc7-f70e0623b88b",
+      "status": 404,
+      "contentType": "application/problem+json; charset=utf-8",
+      "body": "{\"type\":\"https://api.sf/problems/not-found\",\"title\":\"Resource not found\",\"status\":404,\"detail\":\"Order 0f7de3d3-e091-4397-bdc7-f70e0623b88b does not exist.\",\"instance\":\"/v1/orders/0f7de3d3-e091-4397-bdc7-f70e0623b88b\"}",
+      "allowed": [
+        404
+      ],
+      "problems": []
+    },
+    {
+      "family": "wrong-method",
+      "route": "GET /v1/orders/:id",
+      "request": "PUT /v1/orders/0f7de3d3-e091-4397-bdc7-f70e0623b88b",
+      "status": 404,
+      "contentType": "application/problem+json; charset=utf-8",
+      "body": "{\"type\":\"https://api.sf/problems/not-found\",\"title\":\"Route not found\",\"status\":404,\"detail\":\"No route for PUT /v1/orders/0f7de3d3-e091-4397-bdc7-f70e0623b88b\",\"instance\":\"/v1/orders/0f7de3d3-e091-4397-bdc7-f70e0623b88b\"}",
+      "allowed": [
+        404,
+        405
+      ],
+      "problems": []
+    },
+    {
+      "family": "malformed-json",
+      "route": "PATCH /v1/orders/:id",
+      "request": "PATCH /v1/orders/68b73f43-0a2f-47b5-a9d4-d68d080e8ccc body={\"probe\":",
+      "status": 400,
+      "contentType": "application/problem+json; charset=utf-8",
+      "body": "{\"type\":\"https://api.sf/problems/malformed-json\",\"title\":\"Malformed JSON body\",\"status\":400,\"detail\":\"The request body is not valid JSON.\",\"instance\":\"/v1/orders/68b73f43-0a2f-47b5-a9d4-d68d080e8ccc\"}",
+      "allowed": [
+        400,
+        404
+      ],
+      "problems": []
+    },
+    {
+      "family": "empty-body",
+      "route": "PATCH /v1/orders/:id",
+      "request": "PATCH /v1/orders/68b73f43-0a2f-47b5-a9d4-d68d080e8ccc",
+      "status": 422,
+      "contentType": "application/problem+json; charset=utf-8",
+      "body": "{\"type\":\"https://api.sf/problems/validation\",\"title\":\"Request body failed validation\",\"status\":422,\"detail\":\"(root): Invalid input: expected object, received undefined\",\"instance\":\"/v1/orders/68b73f43-0a2f-47b5-a9d4-d68d080e8ccc\"}",
+      "allowed": [
+        400,
+        404,
+        422
+      ],
+      "problems": []
+    },
+    {
+      "family": "malformed-id",
+      "route": "PATCH /v1/orders/:id",
+      "request": "PATCH /v1/orders/not%20a%20valid%20id%21 json={}",
+      "status": 422,
+      "contentType": "application/problem+json; charset=utf-8",
+      "body": "{\"type\":\"https://api.sf/problems/validation\",\"title\":\"Path parameters failed validation\",\"status\":422,\"detail\":\"id: Invalid UUID\",\"instance\":\"/v1/orders/not%20a%20valid%20id%21\"}",
+      "allowed": [
+        400,
+        404,
+        422
+      ],
+      "problems": []
+    },
+    {
+      "family": "unknown-id",
+      "route": "PATCH /v1/orders/:id",
+      "request": "PATCH /v1/orders/68b73f43-0a2f-47b5-a9d4-d68d080e8ccc json={}",
+      "status": 422,
+      "contentType": "application/problem+json; charset=utf-8",
+      "body": "{\"type\":\"https://api.sf/problems/validation\",\"title\":\"Request body failed validation\",\"status\":422,\"detail\":\"(root): At least one field is required\",\"instance\":\"/v1/orders/68b73f43-0a2f-47b5-a9d4-d68d080e8ccc\"}",
+      "allowed": [
+        404,
+        422
+      ],
+      "problems": []
+    },
+    {
+      "family": "malformed-id",
+      "route": "DELETE /v1/orders/:id",
+      "request": "DELETE /v1/orders/not%20a%20valid%20id%21",
+      "status": 422,
+      "contentType": "application/problem+json; charset=utf-8",
+      "body": "{\"type\":\"https://api.sf/problems/validation\",\"title\":\"Path parameters failed validation\",\"status\":422,\"detail\":\"id: Invalid UUID\",\"instance\":\"/v1/orders/not%20a%20valid%20id%21\"}",
+      "allowed": [
+        400,
+        404,
+        422
+      ],
+      "problems": []
+    },
+    {
+      "family": "unknown-id",
+      "route": "DELETE /v1/orders/:id",
+      "request": "DELETE /v1/orders/2d394619-56d4-40ca-a401-8c496304fc99",
+      "status": 404,
+      "contentType": "application/problem+json; charset=utf-8",
+      "body": "{\"type\":\"https://api.sf/problems/not-found\",\"title\":\"Resource not found\",\"status\":404,\"detail\":\"Order 2d394619-56d4-40ca-a401-8c496304fc99 does not exist.\",\"instance\":\"/v1/orders/2d394619-56d4-40ca-a401-8c496304fc99\"}",
+      "allowed": [
+        404
+      ],
+      "problems": []
+    }
+  ]
+}

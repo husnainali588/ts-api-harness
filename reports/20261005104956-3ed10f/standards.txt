@@ -1,0 +1,65 @@
+no-unsafe-ts      pass      src/app.ts                        0 sites
+no-unsafe-ts      pass      src/idempotency.ts                0 sites
+no-unsafe-ts      pass      src/orders/routes.ts              0 sites
+no-unsafe-ts      pass      src/orders/schemas.ts             0 sites
+no-unsafe-ts      pass      src/orders/store.ts               0 sites
+no-unsafe-ts      pass      src/pagination.ts                 0 sites
+no-unsafe-ts      pass      src/problem.ts                    0 sites
+no-unsafe-ts      pass      test/app.test.ts                  0 sites
+no-unsafe-ts      pass      test/idempotency.test.ts          0 sites
+no-unsafe-ts      pass      test/orders/routes.test.ts        0 sites
+no-unsafe-ts      pass      test/orders/schemas.test.ts       0 sites
+no-unsafe-ts      pass      test/orders/store.test.ts         0 sites
+no-unsafe-ts      pass      test/pagination.test.ts           0 sites
+no-unsafe-ts      pass      test/problem.test.ts              0 sites
+problem-json      pass      src/app.ts                        3/3 error paths
+problem-json      pass      src/idempotency.ts                1/1 error paths
+problem-json      pass      src/orders/routes.ts              3/3 error paths
+problem-json      pass      src/pagination.ts                 2/2 error paths
+problem-json      pass      src/problem.ts                    2/2 error paths
+problem-probe     pass      app · unknown-route               1/1 probes
+problem-probe     pass      POST /v1/orders · malformed-json  1/1 probes
+problem-probe     pass      POST /v1/orders · empty-body      1/1 probes
+problem-probe     pass      POST /v1/orders · missing-field   3/3 probes
+problem-probe     pass      POST /v1/orders · wrong-type      4/4 probes
+problem-probe     pass      POST /v1/orders · wrong-method    1/1 probes
+problem-probe     pass      POST /v1/orders · idempotency     3/3 probes
+problem-probe     pass      GET /v1/orders · list-bounds      3/3 probes
+problem-probe     pass      GET /v1/orders/:id · malformed-id 1/1 probes
+problem-probe     pass      GET /v1/orders/:id · unknown-id   1/1 probes
+problem-probe     pass      GET /v1/orders/:id · wrong-method 1/1 probes
+problem-probe     pass      PATCH /v1/orders/:id · malformed-json 1/1 probes
+problem-probe     pass      PATCH /v1/orders/:id · empty-body 1/1 probes
+problem-probe     pass      PATCH /v1/orders/:id · malformed-id 1/1 probes
+problem-probe     pass      PATCH /v1/orders/:id · unknown-id 1/1 probes
+problem-probe     pass      DELETE /v1/orders/:id · malformed-id 1/1 probes
+problem-probe     pass      DELETE /v1/orders/:id · unknown-id 1/1 probes
+rest-conventions  pass      src/orders/routes.ts              5/5 routes
+task-coverage     pass      task tasks/orders-add-field.yaml  1/1 behaviours
+test-assertions   pass      test/app.test.ts                  4/4 test cases
+test-assertions   pass      test/idempotency.test.ts          6/6 test cases
+test-assertions   pass      test/orders/routes.test.ts        17/17 test cases
+test-assertions   pass      test/orders/schemas.test.ts       5/5 test cases
+test-assertions   pass      test/orders/store.test.ts         5/5 test cases
+test-assertions   pass      test/pagination.test.ts           7/7 test cases
+test-assertions   pass      test/problem.test.ts              5/5 test cases
+tests-mapped      pass      src/app.ts                        1/1 files
+tests-mapped      pass      src/idempotency.ts                1/1 files
+tests-mapped      pass      src/orders/routes.ts              1/1 files
+tests-mapped      pass      src/orders/schemas.ts             1/1 files
+tests-mapped      pass      src/orders/store.ts               1/1 files
+tests-mapped      pass      src/pagination.ts                 1/1 files
+tests-mapped      pass      src/problem.ts                    1/1 files
+tsc-strict        pass      tsconfig.json                     0 errors
+zod-boundary      pass      src/orders/routes.ts              5/5 handlers
+────────────────────────────────────────────────────────────
+no-unsafe-ts      pass       0 sites
+problem-json      pass      11/11 error paths
+problem-probe     pass      26/26 probes
+rest-conventions  pass      5/5 routes
+task-coverage     pass      1/1 behaviours
+test-assertions   pass      49/49 test cases
+tests-mapped      pass      7/7 files
+tsc-strict        pass       0 errors
+zod-boundary      pass      5/5 handlers
+verdict           100%      → all rules pass

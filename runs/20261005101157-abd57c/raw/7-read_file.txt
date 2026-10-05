@@ -1,0 +1,40 @@
+src/http/pagination.ts lines 1-39 of 39
+   1| import { z } from 'zod';
+   2| import { ValidationProblem } from './problem.js';
+   3| 
+   4| // Cursor pagination: list endpoints take ?cursor=&limit= and return { data, nextCursor }.
+   5| 
+   6| export const DEFAULT_LIMIT = 20;
+   7| export const MAX_LIMIT = 100;
+   8| 
+   9| /** Query schema for every list endpoint. `page`/`offset` are rejected (strict). */
+  10| export const ListQuery = z.strictObject({
+  11|   cursor: z.string().min(1).optional(),
+  12|   limit: z.coerce.number().int().min(1).max(MAX_LIMIT).default(DEFAULT_LIMIT),
+  13| });
+  14| export type ListQuery = z.infer<typeof ListQuery>;
+  15| 
+  16| /** Response schema for a list endpoint: `pageOf(User)` → { data: User[], nextCursor: string | null }. */
+  17| export function pageOf<T extends z.ZodType>(item: T) {
+  18|   return z.object({ data: z.array(item), nextCursor: z.string().nullable() });
+  19| }
+  20| 
+  21| const CursorPayload = z.object({ after: z.number().int().min(0) });
+  22| 
+  23| export function encodeCursor(after: number): string {
+  24|   return Buffer.from(JSON.stringify({ after }), 'utf8').toString('base64url');
+  25| }
+  26| 
+  27| /** The position to continue after; a garbage cursor is a 422 problem. */
+  28| export function decodeCursor(cursor: string): number {
+  29|   let decoded: unknown;
+  30|   try {
+  31|     decoded = JSON.parse(Buffer.from(cursor, 'base64url').toString('utf8'));
+  32|   } catch {
+  33|     throw new ValidationProblem('Query parameters failed validation', 'cursor: Invalid cursor');
+  34|   }
+  35|   const result = CursorPayload.safeParse(decoded);
+  36|   if (!result.success) throw new ValidationProblem('Query parameters failed validation', 'cursor: Invalid cursor');
+  37|   return result.data.after;
+  38| }
+  39| 

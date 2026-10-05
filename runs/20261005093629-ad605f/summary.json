@@ -1,0 +1,60 @@
+{
+  "runId": "20261005093629-ad605f",
+  "status": "unproven",
+  "reason": "turn budget exhausted (3 turns)",
+  "task": {
+    "path": "tasks/users.yaml",
+    "sha256": "5073335c5df28f36e69ca84db156b14887717b9f5d79add14db59148ae5a0c38",
+    "mode": "greenfield"
+  },
+  "fingerprint": {
+    "sha256": "745386210af57545943d4ec0adf968fc88c373bbbd111f296c2a95221ec5c844",
+    "files": 19
+  },
+  "driver": "claude",
+  "baseline": false,
+  "transports": [
+    "gateway"
+  ],
+  "servedBy": [
+    "anthropic/claude-haiku-4.5"
+  ],
+  "turns": 3,
+  "tokens": {
+    "turns": 3,
+    "totalInputTokens": 8841,
+    "totalOutputTokens": 3100,
+    "meanInputTokensPerTurn": 2947,
+    "peakInputTokens": 3531,
+    "source": "provider"
+  },
+  "branch": "harness/users-claude-ad605f",
+  "worktree": ".harness/worktrees/20261005093629-ad605f",
+  "apiRoot": "generated/users-api",
+  "gate": null,
+  "cost": {
+    "paid": true,
+    "requestedModel": "anthropic/claude-haiku-4.5",
+    "cap": 150000,
+    "spentBefore": 0,
+    "spentAfter": 8841
+  },
+  "writtenFiles": [
+    "test/routes/users.test.ts"
+  ],
+  "contractChanges": null,
+  "prUrl": null,
+  "honesty": {
+    "proven": [],
+    "unproven": [
+      "run: turn budget exhausted (3 turns)"
+    ],
+    "outOfReach": [
+      "business-logic correctness beyond the tests",
+      "test quality beyond red→green",
+      "security",
+      "performance",
+      "persistence semantics"
+    ]
+  }
+}

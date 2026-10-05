@@ -1,0 +1,64 @@
+{
+  "runId": "20261005101157-abd57c",
+  "status": "unproven",
+  "reason": "stopped by cost cap (195373 spent + ~5507 next turn > 200000 input tokens)",
+  "task": {
+    "path": "tasks/users.yaml",
+    "sha256": "5073335c5df28f36e69ca84db156b14887717b9f5d79add14db59148ae5a0c38",
+    "mode": "greenfield"
+  },
+  "fingerprint": {
+    "sha256": "227e8871f77cd21564397764ab0a395677225af97f90cc2aac1f356ed2a4dbe0",
+    "files": 20
+  },
+  "driver": "claude",
+  "baseline": false,
+  "transports": [
+    "gateway"
+  ],
+  "servedBy": [
+    "anthropic/claude-haiku-4.5"
+  ],
+  "turns": 29,
+  "tokens": {
+    "turns": 29,
+    "totalInputTokens": 195373,
+    "totalOutputTokens": 8332,
+    "meanInputTokensPerTurn": 6737,
+    "peakInputTokens": 9553,
+    "source": "provider"
+  },
+  "branch": "harness/users-claude-abd57c",
+  "worktree": ".harness/worktrees/20261005101157-abd57c",
+  "apiRoot": "generated/users-api",
+  "gate": null,
+  "cost": {
+    "paid": true,
+    "requestedModel": "anthropic/claude-haiku-4.5",
+    "cap": 200000,
+    "spentBefore": 365201,
+    "spentAfter": 560574
+  },
+  "writtenFiles": [
+    "test/routes/users.test.ts",
+    "src/schemas/user.ts",
+    "src/routes/users.ts",
+    "test/lib/uuid.test.ts",
+    "src/lib/uuid.ts"
+  ],
+  "contractChanges": null,
+  "prUrl": null,
+  "honesty": {
+    "proven": [],
+    "unproven": [
+      "run: stopped by cost cap (195373 spent + ~5507 next turn > 200000 input tokens)"
+    ],
+    "outOfReach": [
+      "business-logic correctness beyond the tests",
+      "test quality beyond red→green",
+      "security",
+      "performance",
+      "persistence semantics"
+    ]
+  }
+}

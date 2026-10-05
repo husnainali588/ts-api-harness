@@ -1,0 +1,8 @@
+test/orders/routes.test.ts › notes accepts optional notes on create and update and returns them
+AssertionError: expected 422 to be 201 // Object.is equality
+
+test/orders/store.test.ts › OrderStore keeps notes when given
+AssertionError: expected undefined to be 'n' // Object.is equality
+
+--- vitest stderr ---
+Command failed: /opt/homebrew/Cellar/node/26.10.0_1/bin/node /Users/husnainali/Claude Code/AGENT HARNESS/.harness/worktrees/20261005104956-3ed10f/fixtures/sample-api/node_modules/vitest/vitest.mjs run --reporter=json --outputFile=/Users/husnainali/Claude Code/AGENT HARNESS/.harness/runs/20261005104956-3ed10f/vitest-4-1791197401484.json --passWithNoTests

@@ -1,0 +1,53 @@
+{
+  "runId": "20261005083903-4a896f",
+  "status": "unproven",
+  "reason": "driver error: 401 Missing Authentication header",
+  "task": {
+    "path": "tasks/users.yaml",
+    "sha256": "5073335c5df28f36e69ca84db156b14887717b9f5d79add14db59148ae5a0c38",
+    "mode": "greenfield"
+  },
+  "fingerprint": {
+    "sha256": "412897c3389918fe822139bc4ed86d618c98395954400f0d689997414146aca8",
+    "files": 17
+  },
+  "driver": "openai",
+  "baseline": false,
+  "transports": [],
+  "servedBy": [],
+  "turns": 0,
+  "tokens": {
+    "turns": 0,
+    "totalInputTokens": 0,
+    "totalOutputTokens": 0,
+    "meanInputTokensPerTurn": 0,
+    "peakInputTokens": 0,
+    "source": "none"
+  },
+  "branch": "harness/users-openai-4a896f",
+  "worktree": ".harness/worktrees/20261005083903-4a896f",
+  "apiRoot": "generated/users-api",
+  "gate": null,
+  "cost": {
+    "paid": true,
+    "requestedModel": "openai/gpt-5.4-mini",
+    "cap": 150000,
+    "spentBefore": 0,
+    "spentAfter": 0
+  },
+  "prUrl": null,
+  "honesty": {
+    "proven": [],
+    "unproven": [
+      "run: driver error: 401 Missing Authentication header",
+      "token numbers are estimates (scripted/replayed driver), not evidence"
+    ],
+    "outOfReach": [
+      "business-logic correctness beyond the tests",
+      "test quality beyond red→green",
+      "security",
+      "performance",
+      "persistence semantics"
+    ]
+  }
+}

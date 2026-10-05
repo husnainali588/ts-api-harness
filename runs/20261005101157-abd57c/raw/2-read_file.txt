@@ -1,0 +1,123 @@
+src/http/problem.ts lines 1-122 of 122
+   1| import type { NextFunction, Request, Response } from 'express';
+   2| import { z } from 'zod';
+   3| 
+   4| // RFC 7807 problem details. Every non-2xx response is built here; route code throws the errors below.
+   5| 
+   6| export const PROBLEM_TYPE_BASE = 'https://api.sf/problems/';
+   7| 
+   8| export const Problem = z.object({
+   9|   type: z.url(),
+  10|   title: z.string().min(1),
+  11|   status: z.number().int().min(400).max(599),
+  12|   detail: z.string(),
+  13|   instance: z.string().startsWith('/'),
+  14| });
+  15| export type Problem = z.infer<typeof Problem>;
+  16| 
+  17| export class HttpProblem extends Error {
+  18|   constructor(
+  19|     readonly status: number,
+  20|     readonly slug: string,
+  21|     readonly title: string,
+  22|     readonly detail: string,
+  23|   ) {
+  24|     super(detail);
+  25|     this.name = 'HttpProblem';
+  26|   }
+  27| }
+  28| 
+  29| /** 404: the addressed resource does not exist. */
+  30| export class NotFound extends HttpProblem {
+  31|   constructor(detail: string) {
+  32|     super(404, 'not-found', 'Resource not found', detail);
+  33|   }
+  34| }
+  35| 
+  36| /** 409: the request conflicts with current state (e.g. a duplicate unique field). */
+  37| export class Conflict extends HttpProblem {
+  38|   constructor(detail: string) {
+  39|     super(409, 'conflict', 'Conflict', detail);
+  40|   }
+  41| }
+  42| 
+  43| /** 422: the request is well-formed JSON but fails validation. */
+  44| export class ValidationProblem extends HttpProblem {
+  45|   constructor(title: string, detail: string) {
+  46|     super(422, 'validation', title, detail);
+  47|   }
+  48| }
+  49| 
+  50| export type InputSource = 'body' | 'query' | 'params' | 'headers';
+  51| 
+  52| const TITLES: Record<InputSource, string> = {
+  53|   body: 'Request body failed validation',
+  54|   query: 'Query parameters failed validation',
+  55|   params: 'Path parameters failed validation',
+  56|   headers: 'Request headers failed validation',
+  57| };
+  58| 
+  59| export function formatIssues(error: z.ZodError): string {
+  60|   return error.issues
+  61|     .map((issue) => `${issue.path.length > 0 ? issue.path.join('.') : '(root)'}: ${issue.message}`)
+  62|     .join('; ');
+  63| }
+  64| 
+  65| /** Parses untrusted input; a failure becomes a 422 problem. */
+  66| export function parseInput<T extends z.ZodType>(schema: T, value: unknown, source: InputSource): z.output<T> {
+  67|   const result = schema.safeParse(value);
+  68|   if (!result.success) throw new ValidationProblem(TITLES[source], formatIssues(result.error));
+  69|   return result.data;
+  70| }
+  71| 
+  72| export function requestPath(req: Request): string {
+  73|   return new URL(req.originalUrl, 'http://localhost').pathname;
+  74| }
+  75| 
+  76| export function problem(req: Request, status: number, slug: string, title: string, detail: string): Problem {
+  77|   return Problem.parse({ type: `${PROBLEM_TYPE_BASE}${slug}`, title, status, detail, instance: requestPath(req) });
+  78| }
+  79| 
+  80| export function sendProblem(res: Response, body: Problem): void {
+  81|   // Set the media type first: res.json() only defaults to application/json when no Content-Type is set.
+  82|   res.status(body.status).type('application/problem+json').json(body);
+  83| }
+  84| 
+  85| /** Catch-all 404 for unknown routes and unsupported methods. */
+  86| export function notFoundHandler(req: Request, res: Response): void {
+  87|   sendProblem(res, problem(req, 404, 'not-found', 'Route not found', `No route for ${req.method} ${requestPath(req)}`));
+  88| }
+  89| 
+  90| function errorType(err: unknown): string | undefined {
+  91|   return typeof err === 'object' && err !== null && 'type' in err && typeof err.type === 'string' ? err.type : undefined;
+  92| }
+  93| 
+  94| function clientStatus(err: unknown): number | undefined {
+  95|   if (typeof err === 'object' && err !== null && 'status' in err && typeof err.status === 'number') {
+  96|     return err.status >= 400 && err.status < 500 ? err.status : undefined;
+  97|   }
+  98|   return undefined;
+  99| }
+ 100| 
+ 101| /** Fallback error handler: problems keep their status, malformed JSON is 400, anything unknown is 500 without a stack. */
+ 102| export function errorHandler(err: unknown, req: Request, res: Response, next: NextFunction): void {
+ 103|   if (res.headersSent) {
+ 104|     next(err);
+ 105|     return;
+ 106|   }
+ 107|   if (err instanceof HttpProblem) {
+ 108|     sendProblem(res, problem(req, err.status, err.slug, err.title, err.detail));
+ 109|     return;
+ 110|   }
+ 111|   if (errorType(err) === 'entity.parse.failed') {
+ 112|     sendProblem(res, problem(req, 400, 'malformed-json', 'Malformed JSON body', 'The request body is not valid JSON.'));
+ 113|     return;
+ 114|   }
+ 115|   const status = clientStatus(err);
+ 116|   if (status !== undefined) {
+ 117|     sendProblem(res, problem(req, status, 'bad-request', 'Bad request', 'The request could not be processed.'));
+ 118|     return;
+ 119|   }
+ 120|   sendProblem(res, problem(req, 500, 'internal', 'Internal server error', 'An unexpected error occurred.'));
+ 121| }
+ 122| 

@@ -1,0 +1,58 @@
+{
+  "runId": "20261005093822-7f9bba",
+  "status": "unproven",
+  "reason": "driver error: 429 Provider returned error",
+  "task": {
+    "path": "tasks/users.yaml",
+    "sha256": "5073335c5df28f36e69ca84db156b14887717b9f5d79add14db59148ae5a0c38",
+    "mode": "greenfield"
+  },
+  "fingerprint": {
+    "sha256": "745386210af57545943d4ec0adf968fc88c373bbbd111f296c2a95221ec5c844",
+    "files": 19
+  },
+  "driver": "openai",
+  "baseline": false,
+  "transports": [
+    "gateway"
+  ],
+  "servedBy": [
+    "qwen/qwen3.8-27b:free"
+  ],
+  "turns": 6,
+  "tokens": {
+    "turns": 6,
+    "totalInputTokens": 39168,
+    "totalOutputTokens": 5706,
+    "meanInputTokensPerTurn": 6528,
+    "peakInputTokens": 10074,
+    "source": "provider"
+  },
+  "branch": "harness/users-openai-7f9bba",
+  "worktree": ".harness/worktrees/20261005093822-7f9bba",
+  "apiRoot": "generated/users-api",
+  "gate": null,
+  "cost": {
+    "paid": false,
+    "requestedModel": "qwen/qwen3.8-27b:free",
+    "cap": 150000,
+    "spentBefore": 17737,
+    "spentAfter": 17737
+  },
+  "writtenFiles": [],
+  "contractChanges": null,
+  "prUrl": null,
+  "honesty": {
+    "proven": [],
+    "unproven": [
+      "run: driver error: 429 Provider returned error"
+    ],
+    "outOfReach": [
+      "business-logic correctness beyond the tests",
+      "test quality beyond red→green",
+      "security",
+      "performance",
+      "persistence semantics"
+    ]
+  }
+}

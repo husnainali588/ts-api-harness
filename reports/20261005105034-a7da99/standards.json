@@ -1,0 +1,577 @@
+{
+  "runId": "20261005105034-a7da99",
+  "api": ".harness/worktrees/20261005105034-a7da99/generated/users-api",
+  "verdictPct": 100,
+  "green": true,
+  "unproven": [],
+  "rules": [
+    {
+      "id": "no-unsafe-ts",
+      "description": "No any (explicit or inferred), no non-null !, no @ts-ignore/@ts-nocheck/@ts-expect-error, no eslint-disable",
+      "unit": "sites",
+      "required": true,
+      "mode": "count",
+      "status": "pass",
+      "checked": 18,
+      "failing": 0,
+      "files": [
+        {
+          "file": "src/app.ts",
+          "checked": 1,
+          "failures": []
+        },
+        {
+          "file": "src/http/idempotency.ts",
+          "checked": 1,
+          "failures": []
+        },
+        {
+          "file": "src/http/pagination.ts",
+          "checked": 1,
+          "failures": []
+        },
+        {
+          "file": "src/http/problem.ts",
+          "checked": 1,
+          "failures": []
+        },
+        {
+          "file": "src/http/route.ts",
+          "checked": 1,
+          "failures": []
+        },
+        {
+          "file": "src/http/store.ts",
+          "checked": 1,
+          "failures": []
+        },
+        {
+          "file": "src/routes/index.ts",
+          "checked": 1,
+          "failures": []
+        },
+        {
+          "file": "src/routes/users.ts",
+          "checked": 1,
+          "failures": []
+        },
+        {
+          "file": "src/schemas/user.ts",
+          "checked": 1,
+          "failures": []
+        },
+        {
+          "file": "test/app.test.ts",
+          "checked": 1,
+          "failures": []
+        },
+        {
+          "file": "test/http/idempotency.test.ts",
+          "checked": 1,
+          "failures": []
+        },
+        {
+          "file": "test/http/pagination.test.ts",
+          "checked": 1,
+          "failures": []
+        },
+        {
+          "file": "test/http/problem.test.ts",
+          "checked": 1,
+          "failures": []
+        },
+        {
+          "file": "test/http/route.test.ts",
+          "checked": 1,
+          "failures": []
+        },
+        {
+          "file": "test/http/store.test.ts",
+          "checked": 1,
+          "failures": []
+        },
+        {
+          "file": "test/routes/index.test.ts",
+          "checked": 1,
+          "failures": []
+        },
+        {
+          "file": "test/routes/users.test.ts",
+          "checked": 1,
+          "failures": []
+        },
+        {
+          "file": "test/schemas/user.test.ts",
+          "checked": 1,
+          "failures": []
+        }
+      ]
+    },
+    {
+      "id": "problem-json",
+      "description": "Every non-2xx response is application/problem+json with type, title, status, detail, instance",
+      "unit": "error paths",
+      "required": true,
+      "mode": "ratio",
+      "status": "pass",
+      "checked": 12,
+      "failing": 0,
+      "files": [
+        {
+          "file": "src/app.ts",
+          "checked": 3,
+          "failures": []
+        },
+        {
+          "file": "src/http/idempotency.ts",
+          "checked": 0,
+          "failures": []
+        },
+        {
+          "file": "src/http/pagination.ts",
+          "checked": 2,
+          "failures": []
+        },
+        {
+          "file": "src/http/problem.ts",
+          "checked": 2,
+          "failures": []
+        },
+        {
+          "file": "src/http/route.ts",
+          "checked": 0,
+          "failures": []
+        },
+        {
+          "file": "src/http/store.ts",
+          "checked": 0,
+          "failures": []
+        },
+        {
+          "file": "src/routes/index.ts",
+          "checked": 0,
+          "failures": []
+        },
+        {
+          "file": "src/routes/users.ts",
+          "checked": 5,
+          "failures": []
+        },
+        {
+          "file": "src/schemas/user.ts",
+          "checked": 0,
+          "failures": []
+        }
+      ]
+    },
+    {
+      "id": "problem-probe",
+      "description": "Boots the API and probes every route with schema-generated bad requests; every error must be a correct problem+json",
+      "unit": "probes",
+      "required": true,
+      "mode": "ratio",
+      "status": "pass",
+      "checked": 25,
+      "failing": 0,
+      "files": [
+        {
+          "file": "app · unknown-route",
+          "checked": 1,
+          "failures": []
+        },
+        {
+          "file": "POST /v1/users · malformed-json",
+          "checked": 1,
+          "failures": []
+        },
+        {
+          "file": "POST /v1/users · empty-body",
+          "checked": 1,
+          "failures": []
+        },
+        {
+          "file": "POST /v1/users · missing-field",
+          "checked": 2,
+          "failures": []
+        },
+        {
+          "file": "POST /v1/users · wrong-type",
+          "checked": 2,
+          "failures": []
+        },
+        {
+          "file": "POST /v1/users · wrong-method",
+          "checked": 1,
+          "failures": []
+        },
+        {
+          "file": "POST /v1/users · idempotency",
+          "checked": 3,
+          "failures": []
+        },
+        {
+          "file": "POST /v1/users · duplicate",
+          "checked": 2,
+          "failures": []
+        },
+        {
+          "file": "GET /v1/users · list-bounds",
+          "checked": 3,
+          "failures": []
+        },
+        {
+          "file": "GET /v1/users/:id · malformed-id",
+          "checked": 1,
+          "failures": []
+        },
+        {
+          "file": "GET /v1/users/:id · unknown-id",
+          "checked": 1,
+          "failures": []
+        },
+        {
+          "file": "GET /v1/users/:id · wrong-method",
+          "checked": 1,
+          "failures": []
+        },
+        {
+          "file": "PATCH /v1/users/:id · malformed-json",
+          "checked": 1,
+          "failures": []
+        },
+        {
+          "file": "PATCH /v1/users/:id · empty-body",
+          "checked": 1,
+          "failures": []
+        },
+        {
+          "file": "PATCH /v1/users/:id · malformed-id",
+          "checked": 1,
+          "failures": []
+        },
+        {
+          "file": "PATCH /v1/users/:id · unknown-id",
+          "checked": 1,
+          "failures": []
+        },
+        {
+          "file": "DELETE /v1/users/:id · malformed-id",
+          "checked": 1,
+          "failures": []
+        },
+        {
+          "file": "DELETE /v1/users/:id · unknown-id",
+          "checked": 1,
+          "failures": []
+        }
+      ]
+    },
+    {
+      "id": "rest-conventions",
+      "description": "Versioned base path, plural nouns, cursor pagination, idempotent create, 201/204/404/409/422",
+      "unit": "routes",
+      "required": true,
+      "mode": "ratio",
+      "status": "pass",
+      "checked": 5,
+      "failing": 0,
+      "files": [
+        {
+          "file": "src/app.ts",
+          "checked": 0,
+          "failures": []
+        },
+        {
+          "file": "src/http/idempotency.ts",
+          "checked": 0,
+          "failures": []
+        },
+        {
+          "file": "src/http/pagination.ts",
+          "checked": 0,
+          "failures": []
+        },
+        {
+          "file": "src/http/problem.ts",
+          "checked": 0,
+          "failures": []
+        },
+        {
+          "file": "src/http/route.ts",
+          "checked": 0,
+          "failures": []
+        },
+        {
+          "file": "src/http/store.ts",
+          "checked": 0,
+          "failures": []
+        },
+        {
+          "file": "src/routes/index.ts",
+          "checked": 0,
+          "failures": []
+        },
+        {
+          "file": "src/routes/users.ts",
+          "checked": 5,
+          "failures": []
+        },
+        {
+          "file": "src/schemas/user.ts",
+          "checked": 0,
+          "failures": []
+        }
+      ]
+    },
+    {
+      "id": "task-coverage",
+      "description": "Routes for every behaviour the task names (greenfield); every task field in a schema (brownfield)",
+      "unit": "behaviours",
+      "required": true,
+      "mode": "ratio",
+      "status": "pass",
+      "checked": 5,
+      "failing": 0,
+      "files": [
+        {
+          "file": "task tasks/users.yaml",
+          "checked": 5,
+          "failures": []
+        }
+      ]
+    },
+    {
+      "id": "test-assertions",
+      "description": "Every test case makes at least one assertion",
+      "unit": "test cases",
+      "required": true,
+      "mode": "ratio",
+      "status": "pass",
+      "checked": 40,
+      "failing": 0,
+      "files": [
+        {
+          "file": "test/app.test.ts",
+          "checked": 5,
+          "failures": []
+        },
+        {
+          "file": "test/http/idempotency.test.ts",
+          "checked": 5,
+          "failures": []
+        },
+        {
+          "file": "test/http/pagination.test.ts",
+          "checked": 5,
+          "failures": []
+        },
+        {
+          "file": "test/http/problem.test.ts",
+          "checked": 5,
+          "failures": []
+        },
+        {
+          "file": "test/http/route.test.ts",
+          "checked": 6,
+          "failures": []
+        },
+        {
+          "file": "test/http/store.test.ts",
+          "checked": 3,
+          "failures": []
+        },
+        {
+          "file": "test/routes/index.test.ts",
+          "checked": 1,
+          "failures": []
+        },
+        {
+          "file": "test/routes/users.test.ts",
+          "checked": 7,
+          "failures": []
+        },
+        {
+          "file": "test/schemas/user.test.ts",
+          "checked": 3,
+          "failures": []
+        }
+      ]
+    },
+    {
+      "id": "tests-mapped",
+      "description": "Every source file has a mapped test; no .skip/.only/.todo",
+      "unit": "files",
+      "required": true,
+      "mode": "ratio",
+      "status": "pass",
+      "checked": 9,
+      "failing": 0,
+      "files": [
+        {
+          "file": "src/app.ts",
+          "checked": 1,
+          "failures": []
+        },
+        {
+          "file": "src/http/idempotency.ts",
+          "checked": 1,
+          "failures": []
+        },
+        {
+          "file": "src/http/pagination.ts",
+          "checked": 1,
+          "failures": []
+        },
+        {
+          "file": "src/http/problem.ts",
+          "checked": 1,
+          "failures": []
+        },
+        {
+          "file": "src/http/route.ts",
+          "checked": 1,
+          "failures": []
+        },
+        {
+          "file": "src/http/store.ts",
+          "checked": 1,
+          "failures": []
+        },
+        {
+          "file": "src/routes/index.ts",
+          "checked": 1,
+          "failures": []
+        },
+        {
+          "file": "src/routes/users.ts",
+          "checked": 1,
+          "failures": []
+        },
+        {
+          "file": "src/schemas/user.ts",
+          "checked": 1,
+          "failures": []
+        },
+        {
+          "file": "test/app.test.ts",
+          "checked": 0,
+          "failures": []
+        },
+        {
+          "file": "test/http/idempotency.test.ts",
+          "checked": 0,
+          "failures": []
+        },
+        {
+          "file": "test/http/pagination.test.ts",
+          "checked": 0,
+          "failures": []
+        },
+        {
+          "file": "test/http/problem.test.ts",
+          "checked": 0,
+          "failures": []
+        },
+        {
+          "file": "test/http/route.test.ts",
+          "checked": 0,
+          "failures": []
+        },
+        {
+          "file": "test/http/store.test.ts",
+          "checked": 0,
+          "failures": []
+        },
+        {
+          "file": "test/routes/index.test.ts",
+          "checked": 0,
+          "failures": []
+        },
+        {
+          "file": "test/routes/users.test.ts",
+          "checked": 0,
+          "failures": []
+        },
+        {
+          "file": "test/schemas/user.test.ts",
+          "checked": 0,
+          "failures": []
+        }
+      ]
+    },
+    {
+      "id": "tsc-strict",
+      "description": "tsc --noEmit is clean with strict and noUncheckedIndexedAccess enabled",
+      "unit": "errors",
+      "required": true,
+      "mode": "count",
+      "status": "pass",
+      "checked": 1,
+      "failing": 0,
+      "files": [
+        {
+          "file": "tsconfig.json",
+          "checked": 1,
+          "failures": []
+        }
+      ]
+    },
+    {
+      "id": "zod-boundary",
+      "description": "Params, query, body and responses parsed with Zod; types inferred, never duplicated; no z.any()",
+      "unit": "handlers",
+      "required": true,
+      "mode": "ratio",
+      "status": "pass",
+      "checked": 5,
+      "failing": 0,
+      "files": [
+        {
+          "file": "src/app.ts",
+          "checked": 0,
+          "failures": []
+        },
+        {
+          "file": "src/http/idempotency.ts",
+          "checked": 0,
+          "failures": []
+        },
+        {
+          "file": "src/http/pagination.ts",
+          "checked": 0,
+          "failures": []
+        },
+        {
+          "file": "src/http/problem.ts",
+          "checked": 0,
+          "failures": []
+        },
+        {
+          "file": "src/http/route.ts",
+          "checked": 0,
+          "failures": []
+        },
+        {
+          "file": "src/http/store.ts",
+          "checked": 0,
+          "failures": []
+        },
+        {
+          "file": "src/routes/index.ts",
+          "checked": 0,
+          "failures": []
+        },
+        {
+          "file": "src/routes/users.ts",
+          "checked": 5,
+          "failures": []
+        },
+        {
+          "file": "src/schemas/user.ts",
+          "checked": 0,
+          "failures": []
+        }
+      ]
+    }
+  ]
+}

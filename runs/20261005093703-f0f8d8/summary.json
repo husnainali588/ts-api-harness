@@ -1,0 +1,58 @@
+{
+  "runId": "20261005093703-f0f8d8",
+  "status": "unproven",
+  "reason": "turn budget exhausted (3 turns)",
+  "task": {
+    "path": "tasks/users.yaml",
+    "sha256": "5073335c5df28f36e69ca84db156b14887717b9f5d79add14db59148ae5a0c38",
+    "mode": "greenfield"
+  },
+  "fingerprint": {
+    "sha256": "745386210af57545943d4ec0adf968fc88c373bbbd111f296c2a95221ec5c844",
+    "files": 19
+  },
+  "driver": "openai",
+  "baseline": false,
+  "transports": [
+    "gateway"
+  ],
+  "servedBy": [
+    "openai/gpt-5.4-mini"
+  ],
+  "turns": 3,
+  "tokens": {
+    "turns": 3,
+    "totalInputTokens": 8896,
+    "totalOutputTokens": 358,
+    "meanInputTokensPerTurn": 2965,
+    "peakInputTokens": 6145,
+    "source": "provider"
+  },
+  "branch": "harness/users-openai-f0f8d8",
+  "worktree": ".harness/worktrees/20261005093703-f0f8d8",
+  "apiRoot": "generated/users-api",
+  "gate": null,
+  "cost": {
+    "paid": true,
+    "requestedModel": "openai/gpt-5.4-mini",
+    "cap": 150000,
+    "spentBefore": 8841,
+    "spentAfter": 17737
+  },
+  "writtenFiles": [],
+  "contractChanges": null,
+  "prUrl": null,
+  "honesty": {
+    "proven": [],
+    "unproven": [
+      "run: turn budget exhausted (3 turns)"
+    ],
+    "outOfReach": [
+      "business-logic correctness beyond the tests",
+      "test quality beyond red→green",
+      "security",
+      "performance",
+      "persistence semantics"
+    ]
+  }
+}

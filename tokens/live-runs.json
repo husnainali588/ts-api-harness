@@ -1,0 +1,201 @@
+{
+  "measuredFrom": "provider usage: input tokens incl. cached (live runs only)",
+  "evidence": true,
+  "note": "Actual-mode live runs only; no live baseline was run (budget), so no reduction percentage is claimed from these.",
+  "runs": [
+    {
+      "runId": "20261005093629-ad605f",
+      "driver": "claude",
+      "servedBy": [
+        "anthropic/claude-haiku-4.5"
+      ],
+      "transport": "gateway",
+      "outcome": "turn budget exhausted (3 turns)",
+      "turns": 3,
+      "totalInputTokens": 8841,
+      "totalOutputTokens": 3100,
+      "meanInputTokensPerTurn": 2947,
+      "peakInputTokens": 3531,
+      "perTurnInput": [
+        2030,
+        3280,
+        3531
+      ]
+    },
+    {
+      "runId": "20261005093703-f0f8d8",
+      "driver": "openai",
+      "servedBy": [
+        "openai/gpt-5.4-mini"
+      ],
+      "transport": "gateway",
+      "outcome": "turn budget exhausted (3 turns)",
+      "turns": 3,
+      "totalInputTokens": 8896,
+      "totalOutputTokens": 358,
+      "meanInputTokensPerTurn": 2965,
+      "peakInputTokens": 6145,
+      "perTurnInput": [
+        1006,
+        1745,
+        6145
+      ]
+    },
+    {
+      "runId": "20261005093822-7f9bba",
+      "driver": "openai",
+      "servedBy": [
+        "qwen/qwen3.8-27b:free"
+      ],
+      "transport": "gateway",
+      "outcome": "driver error: 429 Provider returned error",
+      "turns": 6,
+      "totalInputTokens": 39168,
+      "totalOutputTokens": 5706,
+      "meanInputTokensPerTurn": 6528,
+      "peakInputTokens": 10074,
+      "perTurnInput": [
+        1749,
+        2526,
+        7557,
+        8328,
+        8934,
+        10074
+      ]
+    },
+    {
+      "runId": "20261005094610-7b015f",
+      "driver": "claude",
+      "servedBy": [
+        "anthropic/claude-haiku-4.5"
+      ],
+      "transport": "gateway",
+      "outcome": "stopped by cost cap (147536 spent + ~5193 next turn > 150000 input tokens)",
+      "turns": 27,
+      "totalInputTokens": 147536,
+      "totalOutputTokens": 8459,
+      "meanInputTokensPerTurn": 5464,
+      "peakInputTokens": 8684,
+      "perTurnInput": [
+        2052,
+        3256,
+        3492,
+        3936,
+        4125,
+        6083,
+        6414,
+        5734,
+        8684,
+        6060,
+        6437,
+        6198,
+        4850,
+        5008,
+        5378,
+        5212,
+        5483,
+        5392,
+        5475,
+        5624,
+        5460,
+        5575,
+        7000,
+        6091,
+        5896,
+        6111,
+        6510
+      ]
+    },
+    {
+      "runId": "20261005100426-810aa6",
+      "driver": "claude",
+      "servedBy": [
+        "anthropic/claude-haiku-4.5"
+      ],
+      "transport": "gateway",
+      "outcome": "stopped by cost cap (199928 spent + ~6575 next turn > 200000 input tokens)",
+      "turns": 30,
+      "totalInputTokens": 199928,
+      "totalOutputTokens": 7459,
+      "meanInputTokensPerTurn": 6664,
+      "peakInputTokens": 10724,
+      "perTurnInput": [
+        2052,
+        2892,
+        3383,
+        4877,
+        6093,
+        6365,
+        6570,
+        9380,
+        6047,
+        4964,
+        4383,
+        5112,
+        4497,
+        4731,
+        4968,
+        4929,
+        5138,
+        5311,
+        6657,
+        8146,
+        10027,
+        10353,
+        10424,
+        10724,
+        9545,
+        8943,
+        8256,
+        8089,
+        8224,
+        8848
+      ]
+    },
+    {
+      "runId": "20261005101157-abd57c",
+      "driver": "claude",
+      "servedBy": [
+        "anthropic/claude-haiku-4.5"
+      ],
+      "transport": "gateway",
+      "outcome": "stopped by cost cap (195373 spent + ~5507 next turn > 200000 input tokens)",
+      "turns": 29,
+      "totalInputTokens": 195373,
+      "totalOutputTokens": 8332,
+      "meanInputTokensPerTurn": 6737,
+      "peakInputTokens": 9553,
+      "perTurnInput": [
+        2052,
+        3131,
+        4638,
+        5854,
+        6314,
+        6519,
+        6944,
+        9553,
+        8632,
+        7974,
+        7876,
+        8030,
+        7939,
+        5198,
+        5460,
+        6720,
+        7063,
+        7163,
+        7508,
+        7418,
+        7609,
+        6526,
+        6467,
+        6599,
+        7279,
+        7259,
+        7090,
+        7137,
+        7421
+      ]
+    }
+  ]
+}

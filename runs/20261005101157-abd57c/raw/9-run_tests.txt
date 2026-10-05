@@ -1,0 +1,11 @@
+test/app.test.ts › (file failed to load)
+Cannot find package 'uuid' imported from /Users/husnainali/Claude Code/AGENT HARNESS/.harness/worktrees/20261005101157-abd57c/generated/users-api/src/routes/use
+
+test/routes/index.test.ts › (file failed to load)
+Cannot find package 'uuid' imported from /Users/husnainali/Claude Code/AGENT HARNESS/.harness/worktrees/20261005101157-abd57c/generated/users-api/src/routes/use
+
+test/routes/users.test.ts › (file failed to load)
+Cannot find package 'uuid' imported from /Users/husnainali/Claude Code/AGENT HARNESS/.harness/worktrees/20261005101157-abd57c/generated/users-api/src/routes/use
+
+--- vitest stderr ---
+Command failed: /opt/homebrew/Cellar/node/26.10.0_1/bin/node /Users/husnainali/Claude Code/AGENT HARNESS/.harness/worktrees/20261005101157-abd57c/generated/users-api/node_modules/vitest/vitest.mjs run --reporter=json --outputFile=/Users/husnainali/Claude Code/AGENT HARNESS/.harness/runs/20261005101157-abd57c/vitest-16-1791195170060.json --passWithNoTests

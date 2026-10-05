@@ -1,0 +1,81 @@
+{
+  "runId": "20261005090611-08390b",
+  "status": "green",
+  "reason": "finish gate green",
+  "task": {
+    "path": "tasks/users.yaml",
+    "sha256": "5073335c5df28f36e69ca84db156b14887717b9f5d79add14db59148ae5a0c38",
+    "mode": "greenfield"
+  },
+  "fingerprint": {
+    "sha256": "5d84573f52ecf3fb9c4308d282fe7d9f9c5a1e2cb43aad2f23730e455ab772ad",
+    "files": 17
+  },
+  "driver": "scripted",
+  "baseline": false,
+  "transports": [
+    "local"
+  ],
+  "servedBy": [
+    "scripted"
+  ],
+  "turns": 14,
+  "tokens": {
+    "turns": 14,
+    "totalInputTokens": 35657,
+    "totalOutputTokens": 2248,
+    "meanInputTokensPerTurn": 2547,
+    "peakInputTokens": 3983,
+    "source": "estimate"
+  },
+  "branch": "harness/users-scripted-08390b",
+  "worktree": ".harness/worktrees/20261005090611-08390b",
+  "apiRoot": "generated/users-api",
+  "gate": {
+    "green": true,
+    "lines": [
+      "tests        pass      PASS 44 / FAIL 0",
+      "continuity   pass      2/2 red cases now green",
+      "tsc          pass      0 errors",
+      "standards    pass      verdict 100% (8 rules pass, 0 n/a)"
+    ],
+    "unproven": []
+  },
+  "cost": {
+    "paid": false,
+    "requestedModel": null,
+    "cap": 400000,
+    "spentBefore": 0,
+    "spentAfter": 0
+  },
+  "writtenFiles": [
+    "test/schemas/user.test.ts",
+    "test/routes/users.test.ts",
+    "src/schemas/user.ts",
+    "src/routes/users.ts"
+  ],
+  "contractChanges": null,
+  "prUrl": "https://github.com/husnainali588/ts-api-harness/pull/1",
+  "honesty": {
+    "proven": [
+      "tests        pass      PASS 44 / FAIL 0",
+      "continuity   pass      2/2 red cases now green",
+      "tsc          pass      0 errors",
+      "standards    pass      verdict 100% (8 rules pass, 0 n/a)"
+    ],
+    "unproven": [
+      "token numbers are estimates (scripted/replayed driver), not evidence"
+    ],
+    "outOfReach": [
+      "business-logic correctness beyond the tests",
+      "test quality beyond red→green",
+      "security",
+      "performance",
+      "persistence semantics"
+    ]
+  },
+  "shipped": {
+    "branch": "harness/users-scripted-08390b",
+    "commit": "953a46d298699f59c956bf8c952d2784578ebd64"
+  }
+}

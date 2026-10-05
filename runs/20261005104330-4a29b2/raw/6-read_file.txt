@@ -1,0 +1,201 @@
+test/routes/users.test.ts lines 1-200 of 333
+   1| import { describe, expect, it } from 'vitest';
+   2| import request from 'supertest';
+   3| import { createApp } from '../../src/app.js';
+   4| import usersRoutes from '../../src/routes/users.js';
+   5| 
+   6| describe('users routes', () => {
+   7|   const app = createApp(usersRoutes());
+   8| 
+   9|   describe('POST /v1/users', () => {
+  10|     it('creates a user with email and name', async () => {
+  11|       const res = await request(app)
+  12|         .post('/v1/users')
+  13|         .send({ email: 'alice@example.com', name: 'Alice' });
+  14| 
+  15|       expect(res.status).toBe(201);
+  16|       expect(res.body).toHaveProperty('id');
+  17|       expect(res.body.email).toBe('alice@example.com');
+  18|       expect(res.body.name).toBe('Alice');
+  19|       expect(res.body).toHaveProperty('createdAt');
+  20|       expect(res.headers.location).toBe(`/v1/users/${res.body.id}`);
+  21|     });
+  22| 
+  23|     it('rejects a user without email', async () => {
+  24|       const res = await request(app)
+  25|         .post('/v1/users')
+  26|         .send({ name: 'Bob' });
+  27| 
+  28|       expect(res.status).toBe(422);
+  29|       expect(res.body.status).toBe(422);
+  30|     });
+  31| 
+  32|     it('rejects a user without name', async () => {
+  33|       const res = await request(app)
+  34|         .post('/v1/users')
+  35|         .send({ email: 'bob@example.com' });
+  36| 
+  37|       expect(res.status).toBe(422);
+  38|       expect(res.body.status).toBe(422);
+  39|     });
+  40| 
+  41|     it('rejects invalid email', async () => {
+  42|       const res = await request(app)
+  43|         .post('/v1/users')
+  44|         .send({ email: 'not-an-email', name: 'Charlie' });
+  45| 
+  46|       expect(res.status).toBe(422);
+  47|       expect(res.body.status).toBe(422);
+  48|     });
+  49| 
+  50|     it('rejects name with length < 1', async () => {
+  51|       const res = await request(app)
+  52|         .post('/v1/users')
+  53|         .send({ email: 'charlie@example.com', name: '' });
+  54| 
+  55|       expect(res.status).toBe(422);
+  56|       expect(res.body.status).toBe(422);
+  57|     });
+  58| 
+  59|     it('rejects name with length > 100', async () => {
+  60|       const res = await request(app)
+  61|         .post('/v1/users')
+  62|         .send({ email: 'david@example.com', name: 'a'.repeat(101) });
+  63| 
+  64|       expect(res.status).toBe(422);
+  65|       expect(res.body.status).toBe(422);
+  66|     });
+  67| 
+  68|     it('rejects duplicate email with 409 conflict', async () => {
+  69|       await request(app)
+  70|         .post('/v1/users')
+  71|         .send({ email: 'eve@example.com', name: 'Eve' });
+  72| 
+  73|       const res = await request(app)
+  74|         .post('/v1/users')
+  75|         .send({ email: 'eve@example.com', name: 'Eve2' });
+  76| 
+  77|       expect(res.status).toBe(409);
+  78|       expect(res.body.status).toBe(409);
+  79|     });
+  80|   });
+  81| 
+  82|   describe('GET /v1/users/:id', () => {
+  83|     it('retrieves a user by id', async () => {
+  84|       const createRes = await request(app)
+  85|         .post('/v1/users')
+  86|         .send({ email: 'frank@example.com', name: 'Frank' });
+  87| 
+  88|       const id = createRes.body.id;
+  89| 
+  90|       const res = await request(app)
+  91|         .get(`/v1/users/${id}`);
+  92| 
+  93|       expect(res.status).toBe(200);
+  94|       expect(res.body.id).toBe(id);
+  95|       expect(res.body.email).toBe('frank@example.com');
+  96|       expect(res.body.name).toBe('Frank');
+  97|     });
+  98| 
+  99|     it('returns 404 for unknown user id', async () => {
+ 100|       const res = await request(app)
+ 101|         .get('/v1/users/00000000-0000-0000-0000-000000000000');
+ 102| 
+ 103|       expect(res.status).toBe(404);
+ 104|       expect(res.body.status).toBe(404);
+ 105|     });
+ 106|   });
+ 107| 
+ 108|   describe('GET /v1/users', () => {
+ 109|     it('lists users with default limit 20', async () => {
+ 110|       for (let i = 0; i < 5; i++) {
+ 111|         await request(app)
+ 112|           .post('/v1/users')
+ 113|           .send({ email: `user${i}@example.com`, name: `User ${i}` });
+ 114|       }
+ 115| 
+ 116|       const res = await request(app)
+ 117|         .get('/v1/users');
+ 118| 
+ 119|       expect(res.status).toBe(200);
+ 120|       expect(res.body.data).toHaveLength(5);
+ 121|       expect(res.body.nextCursor).toBeNull();
+ 122|     });
+ 123| 
+ 124|     it('respects limit query parameter', async () => {
+ 125|       for (let i = 0; i < 5; i++) {
+ 126|         await request(app)
+ 127|           .post('/v1/users')
+ 128|           .send({ email: `page${i}@example.com`, name: `User ${i}` });
+ 129|       }
+ 130| 
+ 131|       const res = await request(app)
+ 132|         .get('/v1/users?limit=2');
+ 133| 
+ 134|       expect(res.status).toBe(200);
+ 135|       expect(res.body.data).toHaveLength(2);
+ 136|       expect(res.body.nextCursor).not.toBeNull();
+ 137|     });
+ 138| 
+ 139|     it('respects cursor parameter', async () => {
+ 140|       for (let i = 0; i < 3; i++) {
+ 141|         await request(app)
+ 142|           .post('/v1/users')
+ 143|           .send({ email: `cursor${i}@example.com`, name: `User ${i}` });
+ 144|       }
+ 145| 
+ 146|       const page1 = await request(app)
+ 147|         .get('/v1/users?limit=1');
+ 148| 
+ 149|       expect(page1.body.data).toHaveLength(1);
+ 150| 
+ 151|       const page2 = await request(app)
+ 152|         .get(`/v1/users?limit=1&cursor=${page1.body.nextCursor}`);
+ 153| 
+ 154|       expect(page2.status).toBe(200);
+ 155|       expect(page2.body.data).toHaveLength(1);
+ 156|       expect(page2.body.data[0].email).not.toBe(page1.body.data[0].email);
+ 157|     });
+ 158| 
+ 159|     it('enforces maximum limit of 100', async () => {
+ 160|       const res = await request(app)
+ 161|         .get('/v1/users?limit=101');
+ 162| 
+ 163|       expect(res.status).toBe(422);
+ 164|       expect(res.body.status).toBe(422);
+ 165|     });
+ 166| 
+ 167|     it('returns empty data with null nextCursor when no users', async () => {
+ 168|       const app2 = createApp(usersRoutes());
+ 169|       const res = await request(app2)
+ 170|         .get('/v1/users');
+ 171| 
+ 172|       expect(res.status).toBe(200);
+ 173|       expect(res.body.data).toHaveLength(0);
+ 174|       expect(res.body.nextCursor).toBeNull();
+ 175|     });
+ 176|   });
+ 177| 
+ 178|   describe('PATCH /v1/users/:id', () => {
+ 179|     it('updates user email', async () => {
+ 180|       const createRes = await request(app)
+ 181|         .post('/v1/users')
+ 182|         .send({ email: 'grace@example.com', name: 'Grace' });
+ 183| 
+ 184|       const id = createRes.body.id;
+ 185| 
+ 186|       const res = await request(app)
+ 187|         .patch(`/v1/users/${id}`)
+ 188|         .send({ email: 'grace2@example.com' });
+ 189| 
+ 190|       expect(res.status).toBe(200);
+ 191|       expect(res.body.id).toBe(id);
+ 192|       expect(res.body.email).toBe('grace2@example.com');
+ 193|       expect(res.body.name).toBe('Grace');
+ 194|     });
+ 195| 
+ 196|     it('updates user name', async () => {
+ 197|       const createRes = await request(app)
+ 198|         .post('/v1/users')
+ 199|         .send({ email: 'henry@example.com', name: 'Henry' });
+ 200| 

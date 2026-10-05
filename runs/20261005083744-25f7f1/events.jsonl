@@ -1,0 +1,3 @@
+{"ts":"2026-10-05T08:37:45.230Z","type":"run-start","runId":"20261005083744-25f7f1","task":"tasks/users.yaml","driver":"claude","baseline":false,"branch":"harness/users-claude-25f7f1","apiRoot":"generated/users-api"}
+{"ts":"2026-10-05T08:37:45.868Z","type":"driver-error","turn":1,"error":"driver error: 401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"Missing Authentication header\",\"error_type\":\"authentication\"},\"request_id\":null}"}
+{"ts":"2026-10-05T08:37:45.894Z","type":"run-end","status":"unproven","reason":"driver error: 401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"Missing Authentication header\",\"error_type\":\"authentication\"},\"request_id\":null}"}

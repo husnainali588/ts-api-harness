@@ -1,0 +1,47 @@
+src/http/store.ts lines 1-46 of 46
+   1| import { decodeCursor, encodeCursor } from './pagination.js';
+   2| 
+   3| // In-memory store for one resource. Rows keep an insertion sequence so cursors survive deletes.
+   4| 
+   5| export class MemoryStore<T extends { id: string }> {
+   6|   private readonly rows = new Map<string, { seq: number; item: T }>();
+   7|   private seq = 0;
+   8| 
+   9|   insert(item: T): T {
+  10|     this.seq += 1;
+  11|     this.rows.set(item.id, { seq: this.seq, item });
+  12|     return item;
+  13|   }
+  14| 
+  15|   get(id: string): T | undefined {
+  16|     return this.rows.get(id)?.item;
+  17|   }
+  18| 
+  19|   /** Replaces an existing row; undefined if it does not exist. */
+  20|   replace(id: string, item: T): T | undefined {
+  21|     const row = this.rows.get(id);
+  22|     if (row === undefined) return undefined;
+  23|     row.item = item;
+  24|     return item;
+  25|   }
+  26| 
+  27|   delete(id: string): boolean {
+  28|     return this.rows.delete(id);
+  29|   }
+  30| 
+  31|   find(predicate: (item: T) => boolean): T | undefined {
+  32|     for (const { item } of this.rows.values()) if (predicate(item)) return item;
+  33|     return undefined;
+  34|   }
+  35| 
+  36|   /** One page in insertion order; an invalid cursor throws a 422 problem. */
+  37|   page(cursor: string | undefined, limit: number): { data: T[]; nextCursor: string | null } {
+  38|     const after = cursor === undefined ? 0 : decodeCursor(cursor);
+  39|     const rows = [...this.rows.values()].filter((row) => row.seq > after).sort((a, b) => a.seq - b.seq);
+  40|     const slice = rows.slice(0, limit);
+  41|     const last = slice.at(-1);
+  42|     const nextCursor = rows.length > limit && last !== undefined ? encodeCursor(last.seq) : null;
+  43|     return { data: slice.map((row) => row.item), nextCursor };
+  44|   }
+  45| }
+  46| 

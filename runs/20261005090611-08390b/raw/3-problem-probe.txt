@@ -1,0 +1,323 @@
+{
+  "source": "routeTable",
+  "probes": [
+    {
+      "family": "unknown-route",
+      "route": "app",
+      "request": "GET /v1/probe-unknown-route-80fb4375",
+      "status": 404,
+      "contentType": "application/problem+json; charset=utf-8",
+      "body": "{\"type\":\"https://api.sf/problems/not-found\",\"title\":\"Route not found\",\"status\":404,\"detail\":\"No route for GET /v1/probe-unknown-route-80fb4375\",\"instance\":\"/v1/probe-unknown-route-80fb4375\"}",
+      "allowed": [
+        404
+      ],
+      "problems": []
+    },
+    {
+      "family": "malformed-json",
+      "route": "POST /v1/users",
+      "request": "POST /v1/users body={\"probe\":",
+      "status": 400,
+      "contentType": "application/problem+json; charset=utf-8",
+      "body": "{\"type\":\"https://api.sf/problems/malformed-json\",\"title\":\"Malformed JSON body\",\"status\":400,\"detail\":\"The request body is not valid JSON.\",\"instance\":\"/v1/users\"}",
+      "allowed": [
+        400
+      ],
+      "problems": []
+    },
+    {
+      "family": "empty-body",
+      "route": "POST /v1/users",
+      "request": "POST /v1/users",
+      "status": 422,
+      "contentType": "application/problem+json; charset=utf-8",
+      "body": "{\"type\":\"https://api.sf/problems/validation\",\"title\":\"Request body failed validation\",\"status\":422,\"detail\":\"(root): Invalid input: expected object, received undefined\",\"instance\":\"/v1/users\"}",
+      "allowed": [
+        400,
+        422
+      ],
+      "problems": []
+    },
+    {
+      "family": "missing-field",
+      "route": "POST /v1/users",
+      "request": "POST /v1/users json={\"name\":\"name-4\"}",
+      "status": 422,
+      "contentType": "application/problem+json; charset=utf-8",
+      "body": "{\"type\":\"https://api.sf/problems/validation\",\"title\":\"Request body failed validation\",\"status\":422,\"detail\":\"email: Invalid input: expected string, received undefined\",\"instance\":\"/v1/users\"}",
+      "allowed": [
+        422
+      ],
+      "problems": []
+    },
+    {
+      "family": "missing-field",
+      "route": "POST /v1/users",
+      "request": "POST /v1/users json={\"email\":\"probe5.1791191175912@example.com\"}",
+      "status": 422,
+      "contentType": "application/problem+json; charset=utf-8",
+      "body": "{\"type\":\"https://api.sf/problems/validation\",\"title\":\"Request body failed validation\",\"status\":422,\"detail\":\"name: Invalid input: expected string, received undefined\",\"instance\":\"/v1/users\"}",
+      "allowed": [
+        422
+      ],
+      "problems": []
+    },
+    {
+      "family": "wrong-type",
+      "route": "POST /v1/users",
+      "request": "POST /v1/users json={\"email\":12345,\"name\":\"name-8\"}",
+      "status": 422,
+      "contentType": "application/problem+json; charset=utf-8",
+      "body": "{\"type\":\"https://api.sf/problems/validation\",\"title\":\"Request body failed validation\",\"status\":422,\"detail\":\"email: Invalid input: expected string, received number\",\"instance\":\"/v1/users\"}",
+      "allowed": [
+        422
+      ],
+      "problems": []
+    },
+    {
+      "family": "wrong-type",
+      "route": "POST /v1/users",
+      "request": "POST /v1/users json={\"email\":\"probe9.1791191175913@example.com\",\"name\":12345}",
+      "status": 422,
+      "contentType": "application/problem+json; charset=utf-8",
+      "body": "{\"type\":\"https://api.sf/problems/validation\",\"title\":\"Request body failed validation\",\"status\":422,\"detail\":\"name: Invalid input: expected string, received number\",\"instance\":\"/v1/users\"}",
+      "allowed": [
+        422
+      ],
+      "problems": []
+    },
+    {
+      "family": "wrong-method",
+      "route": "POST /v1/users",
+      "request": "PUT /v1/users",
+      "status": 404,
+      "contentType": "application/problem+json; charset=utf-8",
+      "body": "{\"type\":\"https://api.sf/problems/not-found\",\"title\":\"Route not found\",\"status\":404,\"detail\":\"No route for PUT /v1/users\",\"instance\":\"/v1/users\"}",
+      "allowed": [
+        404,
+        405
+      ],
+      "problems": []
+    },
+    {
+      "family": "idempotency",
+      "route": "POST /v1/users",
+      "request": "POST /v1/users json={\"email\":\"probe11.1791191175914@example.com\",\"name\":\"name-12\"}",
+      "status": 201,
+      "contentType": "application/json; charset=utf-8",
+      "body": "{\"id\":\"75437fa9-9e94-4a8d-944a-97b1f6a2f571\",\"email\":\"probe11.1791191175914@example.com\",\"name\":\"name-12\",\"createdAt\":\"2026-10-05T09:06:15.915Z\"}",
+      "allowed": [
+        200,
+        201
+      ],
+      "problems": []
+    },
+    {
+      "family": "idempotency",
+      "route": "POST /v1/users",
+      "request": "POST /v1/users json={\"email\":\"probe11.1791191175914@example.com\",\"name\":\"name-12\"}",
+      "status": 201,
+      "contentType": "application/json; charset=utf-8",
+      "body": "{\"id\":\"75437fa9-9e94-4a8d-944a-97b1f6a2f571\",\"email\":\"probe11.1791191175914@example.com\",\"name\":\"name-12\",\"createdAt\":\"2026-10-05T09:06:15.915Z\"}",
+      "allowed": [
+        201
+      ],
+      "problems": []
+    },
+    {
+      "family": "idempotency",
+      "route": "POST /v1/users",
+      "request": "POST /v1/users json={\"email\":\"probe13.1791191175916@example.com\",\"name\":\"name-14\"}",
+      "status": 409,
+      "contentType": "application/problem+json; charset=utf-8",
+      "body": "{\"type\":\"https://api.sf/problems/conflict\",\"title\":\"Conflict\",\"status\":409,\"detail\":\"Idempotency-Key was already used with a different request body.\",\"instance\":\"/v1/users\"}",
+      "allowed": [
+        409
+      ],
+      "problems": []
+    },
+    {
+      "family": "duplicate",
+      "route": "POST /v1/users",
+      "request": "POST /v1/users json={\"email\":\"probe15.1791191175917@example.com\",\"name\":\"name-16\"}",
+      "status": 201,
+      "contentType": "application/json; charset=utf-8",
+      "body": "{\"id\":\"6df00eb8-8368-43dc-baae-119aa715c67d\",\"email\":\"probe15.1791191175917@example.com\",\"name\":\"name-16\",\"createdAt\":\"2026-10-05T09:06:15.917Z\"}",
+      "allowed": [
+        200,
+        201
+      ],
+      "problems": []
+    },
+    {
+      "family": "duplicate",
+      "route": "POST /v1/users",
+      "request": "POST /v1/users json={\"email\":\"probe15.1791191175917@example.com\",\"name\":\"name-16\"}",
+      "status": 409,
+      "contentType": "application/problem+json; charset=utf-8",
+      "body": "{\"type\":\"https://api.sf/problems/conflict\",\"title\":\"Conflict\",\"status\":409,\"detail\":\"A user with email probe15.1791191175917@example.com already exists.\",\"instance\":\"/v1/users\"}",
+      "allowed": [
+        409
+      ],
+      "problems": []
+    },
+    {
+      "family": "list-bounds",
+      "route": "GET /v1/users",
+      "request": "GET /v1/users?limit=0",
+      "status": 422,
+      "contentType": "application/problem+json; charset=utf-8",
+      "body": "{\"type\":\"https://api.sf/problems/validation\",\"title\":\"Query parameters failed validation\",\"status\":422,\"detail\":\"limit: Too small: expected number to be >=1\",\"instance\":\"/v1/users\"}",
+      "allowed": [
+        400,
+        422
+      ],
+      "problems": []
+    },
+    {
+      "family": "list-bounds",
+      "route": "GET /v1/users",
+      "request": "GET /v1/users?limit=10000",
+      "status": 422,
+      "contentType": "application/problem+json; charset=utf-8",
+      "body": "{\"type\":\"https://api.sf/problems/validation\",\"title\":\"Query parameters failed validation\",\"status\":422,\"detail\":\"limit: Too big: expected number to be <=100\",\"instance\":\"/v1/users\"}",
+      "allowed": [
+        400,
+        422
+      ],
+      "problems": []
+    },
+    {
+      "family": "list-bounds",
+      "route": "GET /v1/users",
+      "request": "GET /v1/users?cursor=garbage!%40%23",
+      "status": 422,
+      "contentType": "application/problem+json; charset=utf-8",
+      "body": "{\"type\":\"https://api.sf/problems/validation\",\"title\":\"Query parameters failed validation\",\"status\":422,\"detail\":\"cursor: Invalid cursor\",\"instance\":\"/v1/users\"}",
+      "allowed": [
+        400,
+        422
+      ],
+      "problems": []
+    },
+    {
+      "family": "malformed-id",
+      "route": "GET /v1/users/:id",
+      "request": "GET /v1/users/not%20a%20valid%20id%21",
+      "status": 422,
+      "contentType": "application/problem+json; charset=utf-8",
+      "body": "{\"type\":\"https://api.sf/problems/validation\",\"title\":\"Path parameters failed validation\",\"status\":422,\"detail\":\"id: Invalid UUID\",\"instance\":\"/v1/users/not%20a%20valid%20id%21\"}",
+      "allowed": [
+        400,
+        404,
+        422
+      ],
+      "problems": []
+    },
+    {
+      "family": "unknown-id",
+      "route": "GET /v1/users/:id",
+      "request": "GET /v1/users/954b688c-ab33-4e9d-a96c-fc79b487f422",
+      "status": 404,
+      "contentType": "application/problem+json; charset=utf-8",
+      "body": "{\"type\":\"https://api.sf/problems/not-found\",\"title\":\"Resource not found\",\"status\":404,\"detail\":\"User 954b688c-ab33-4e9d-a96c-fc79b487f422 does not exist.\",\"instance\":\"/v1/users/954b688c-ab33-4e9d-a96c-fc79b487f422\"}",
+      "allowed": [
+        404
+      ],
+      "problems": []
+    },
+    {
+      "family": "wrong-method",
+      "route": "GET /v1/users/:id",
+      "request": "PUT /v1/users/954b688c-ab33-4e9d-a96c-fc79b487f422",
+      "status": 404,
+      "contentType": "application/problem+json; charset=utf-8",
+      "body": "{\"type\":\"https://api.sf/problems/not-found\",\"title\":\"Route not found\",\"status\":404,\"detail\":\"No route for PUT /v1/users/954b688c-ab33-4e9d-a96c-fc79b487f422\",\"instance\":\"/v1/users/954b688c-ab33-4e9d-a96c-fc79b487f422\"}",
+      "allowed": [
+        404,
+        405
+      ],
+      "problems": []
+    },
+    {
+      "family": "malformed-json",
+      "route": "PATCH /v1/users/:id",
+      "request": "PATCH /v1/users/594a886a-0919-4dc1-be05-8a90172910f8 body={\"probe\":",
+      "status": 400,
+      "contentType": "application/problem+json; charset=utf-8",
+      "body": "{\"type\":\"https://api.sf/problems/malformed-json\",\"title\":\"Malformed JSON body\",\"status\":400,\"detail\":\"The request body is not valid JSON.\",\"instance\":\"/v1/users/594a886a-0919-4dc1-be05-8a90172910f8\"}",
+      "allowed": [
+        400,
+        404
+      ],
+      "problems": []
+    },
+    {
+      "family": "empty-body",
+      "route": "PATCH /v1/users/:id",
+      "request": "PATCH /v1/users/594a886a-0919-4dc1-be05-8a90172910f8",
+      "status": 422,
+      "contentType": "application/problem+json; charset=utf-8",
+      "body": "{\"type\":\"https://api.sf/problems/validation\",\"title\":\"Request body failed validation\",\"status\":422,\"detail\":\"(root): Invalid input: expected object, received undefined\",\"instance\":\"/v1/users/594a886a-0919-4dc1-be05-8a90172910f8\"}",
+      "allowed": [
+        400,
+        404,
+        422
+      ],
+      "problems": []
+    },
+    {
+      "family": "malformed-id",
+      "route": "PATCH /v1/users/:id",
+      "request": "PATCH /v1/users/not%20a%20valid%20id%21 json={}",
+      "status": 422,
+      "contentType": "application/problem+json; charset=utf-8",
+      "body": "{\"type\":\"https://api.sf/problems/validation\",\"title\":\"Path parameters failed validation\",\"status\":422,\"detail\":\"id: Invalid UUID\",\"instance\":\"/v1/users/not%20a%20valid%20id%21\"}",
+      "allowed": [
+        400,
+        404,
+        422
+      ],
+      "problems": []
+    },
+    {
+      "family": "unknown-id",
+      "route": "PATCH /v1/users/:id",
+      "request": "PATCH /v1/users/594a886a-0919-4dc1-be05-8a90172910f8 json={}",
+      "status": 422,
+      "contentType": "application/problem+json; charset=utf-8",
+      "body": "{\"type\":\"https://api.sf/problems/validation\",\"title\":\"Request body failed validation\",\"status\":422,\"detail\":\"(root): At least one field is required\",\"instance\":\"/v1/users/594a886a-0919-4dc1-be05-8a90172910f8\"}",
+      "allowed": [
+        404,
+        422
+      ],
+      "problems": []
+    },
+    {
+      "family": "malformed-id",
+      "route": "DELETE /v1/users/:id",
+      "request": "DELETE /v1/users/not%20a%20valid%20id%21",
+      "status": 422,
+      "contentType": "application/problem+json; charset=utf-8",
+      "body": "{\"type\":\"https://api.sf/problems/validation\",\"title\":\"Path parameters failed validation\",\"status\":422,\"detail\":\"id: Invalid UUID\",\"instance\":\"/v1/users/not%20a%20valid%20id%21\"}",
+      "allowed": [
+        400,
+        404,
+        422
+      ],
+      "problems": []
+    },
+    {
+      "family": "unknown-id",
+      "route": "DELETE /v1/users/:id",
+      "request": "DELETE /v1/users/c2431aad-a3ea-457f-b8b1-0ead9db16573",
+      "status": 404,
+      "contentType": "application/problem+json; charset=utf-8",
+      "body": "{\"type\":\"https://api.sf/problems/not-found\",\"title\":\"Resource not found\",\"status\":404,\"detail\":\"User c2431aad-a3ea-457f-b8b1-0ead9db16573 does not exist.\",\"instance\":\"/v1/users/c2431aad-a3ea-457f-b8b1-0ead9db16573\"}",
+      "allowed": [
+        404
+      ],
+      "problems": []
+    }
+  ]
+}

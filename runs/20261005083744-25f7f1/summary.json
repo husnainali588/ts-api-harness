@@ -1,0 +1,53 @@
+{
+  "runId": "20261005083744-25f7f1",
+  "status": "unproven",
+  "reason": "driver error: 401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"Missing Authentication header\",\"error_type\":\"authentication\"},\"request_id\":null}",
+  "task": {
+    "path": "tasks/users.yaml",
+    "sha256": "5073335c5df28f36e69ca84db156b14887717b9f5d79add14db59148ae5a0c38",
+    "mode": "greenfield"
+  },
+  "fingerprint": {
+    "sha256": "412897c3389918fe822139bc4ed86d618c98395954400f0d689997414146aca8",
+    "files": 17
+  },
+  "driver": "claude",
+  "baseline": false,
+  "transports": [],
+  "servedBy": [],
+  "turns": 0,
+  "tokens": {
+    "turns": 0,
+    "totalInputTokens": 0,
+    "totalOutputTokens": 0,
+    "meanInputTokensPerTurn": 0,
+    "peakInputTokens": 0,
+    "source": "none"
+  },
+  "branch": "harness/users-claude-25f7f1",
+  "worktree": ".harness/worktrees/20261005083744-25f7f1",
+  "apiRoot": "generated/users-api",
+  "gate": null,
+  "cost": {
+    "paid": true,
+    "requestedModel": "anthropic/claude-haiku-4.5",
+    "cap": 150000,
+    "spentBefore": 0,
+    "spentAfter": 0
+  },
+  "prUrl": null,
+  "honesty": {
+    "proven": [],
+    "unproven": [
+      "run: driver error: 401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"Missing Authentication header\",\"error_type\":\"authentication\"},\"request_id\":null}",
+      "token numbers are estimates (scripted/replayed driver), not evidence"
+    ],
+    "outOfReach": [
+      "business-logic correctness beyond the tests",
+      "test quality beyond red→green",
+      "security",
+      "performance",
+      "persistence semantics"
+    ]
+  }
+}

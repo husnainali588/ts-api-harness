@@ -1,0 +1,63 @@
+{
+  "runId": "20261005104317-6c530e",
+  "status": "fail",
+  "reason": "the model stopped without calling finish",
+  "task": {
+    "path": "tasks/users.yaml",
+    "sha256": "5073335c5df28f36e69ca84db156b14887717b9f5d79add14db59148ae5a0c38",
+    "mode": "greenfield"
+  },
+  "fingerprint": {
+    "sha256": "0f220d5d507e24a5cff702af6f6c763cbfa0f88ec6e36f282d8b040f2fe4b049",
+    "files": 21
+  },
+  "driver": "scripted",
+  "baseline": false,
+  "transports": [
+    "local"
+  ],
+  "servedBy": [
+    "scripted"
+  ],
+  "turns": 29,
+  "tokens": {
+    "turns": 29,
+    "totalInputTokens": 146076,
+    "totalOutputTokens": 6416,
+    "meanInputTokensPerTurn": 5037,
+    "peakInputTokens": 7507,
+    "source": "estimate"
+  },
+  "branch": "harness/users-scripted-6c530e",
+  "worktree": ".harness/worktrees/20261005104317-6c530e",
+  "apiRoot": "generated/users-api",
+  "gate": null,
+  "cost": {
+    "paid": false,
+    "requestedModel": null,
+    "cap": null,
+    "spentBefore": 560574,
+    "spentAfter": 560574
+  },
+  "writtenFiles": [
+    "test/routes/users.test.ts",
+    "test/schemas/user.test.ts",
+    "package.json"
+  ],
+  "contractChanges": null,
+  "prUrl": null,
+  "honesty": {
+    "proven": [],
+    "unproven": [
+      "run: the model stopped without calling finish",
+      "token numbers are estimates (scripted/replayed driver), not evidence"
+    ],
+    "outOfReach": [
+      "business-logic correctness beyond the tests",
+      "test quality beyond red→green",
+      "security",
+      "performance",
+      "persistence semantics"
+    ]
+  }
+}

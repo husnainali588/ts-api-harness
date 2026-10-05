@@ -1,0 +1,207 @@
+{
+  "task": "tasks/users.yaml",
+  "taskSha256": "5073335c5df28f36e69ca84db156b14887717b9f5d79add14db59148ae5a0c38",
+  "driver": "scripted",
+  "transport": "local",
+  "servedBy": [
+    "scripted"
+  ],
+  "measuredFrom": "ESTIMATE (scripted/replay driver, chars/4) — not evidence",
+  "evidence": false,
+  "baseline": {
+    "runId": "20261005105043-0490c3",
+    "completed": false,
+    "stoppedBy": "baseline turn cap (cost)",
+    "turns": [
+      {
+        "turn": 1,
+        "inputTokens": 11441,
+        "outputTokens": 19
+      },
+      {
+        "turn": 2,
+        "inputTokens": 11628,
+        "outputTokens": 21
+      },
+      {
+        "turn": 3,
+        "inputTokens": 11767,
+        "outputTokens": 19
+      },
+      {
+        "turn": 4,
+        "inputTokens": 12283,
+        "outputTokens": 28
+      },
+      {
+        "turn": 5,
+        "inputTokens": 12895,
+        "outputTokens": 21
+      },
+      {
+        "turn": 6,
+        "inputTokens": 13422,
+        "outputTokens": 260
+      },
+      {
+        "turn": 7,
+        "inputTokens": 13963,
+        "outputTokens": 873
+      },
+      {
+        "turn": 8,
+        "inputTokens": 15715,
+        "outputTokens": 15
+      }
+    ],
+    "totalInputTokens": 103114,
+    "meanInputTokensPerTurn": 12889,
+    "peakInputTokens": 15715
+  },
+  "actual": {
+    "runId": "20261005105034-a7da99",
+    "completed": true,
+    "stoppedBy": "finish gate green",
+    "turns": [
+      {
+        "turn": 1,
+        "inputTokens": 1233,
+        "outputTokens": 19
+      },
+      {
+        "turn": 2,
+        "inputTokens": 1420,
+        "outputTokens": 21
+      },
+      {
+        "turn": 3,
+        "inputTokens": 1559,
+        "outputTokens": 19
+      },
+      {
+        "turn": 4,
+        "inputTokens": 2075,
+        "outputTokens": 28
+      },
+      {
+        "turn": 5,
+        "inputTokens": 2687,
+        "outputTokens": 21
+      },
+      {
+        "turn": 6,
+        "inputTokens": 3214,
+        "outputTokens": 260
+      },
+      {
+        "turn": 7,
+        "inputTokens": 3519,
+        "outputTokens": 873
+      },
+      {
+        "turn": 8,
+        "inputTokens": 4308,
+        "outputTokens": 15
+      },
+      {
+        "turn": 9,
+        "inputTokens": 4505,
+        "outputTokens": 205
+      },
+      {
+        "turn": 10,
+        "inputTokens": 4298,
+        "outputTokens": 708
+      },
+      {
+        "turn": 11,
+        "inputTokens": 4509,
+        "outputTokens": 15
+      },
+      {
+        "turn": 12,
+        "inputTokens": 4030,
+        "outputTokens": 21
+      },
+      {
+        "turn": 13,
+        "inputTokens": 3894,
+        "outputTokens": 15
+      },
+      {
+        "turn": 14,
+        "inputTokens": 3234,
+        "outputTokens": 28
+      }
+    ],
+    "totalInputTokens": 44485,
+    "meanInputTokensPerTurn": 3178,
+    "peakInputTokens": 4509
+  },
+  "perTurn": [
+    {
+      "turn": 1,
+      "baseline": 11441,
+      "actual": 1233,
+      "reductionPct": 89.2
+    },
+    {
+      "turn": 2,
+      "baseline": 11628,
+      "actual": 1420,
+      "reductionPct": 87.8
+    },
+    {
+      "turn": 3,
+      "baseline": 11767,
+      "actual": 1559,
+      "reductionPct": 86.8
+    },
+    {
+      "turn": 4,
+      "baseline": 12283,
+      "actual": 2075,
+      "reductionPct": 83.1
+    },
+    {
+      "turn": 5,
+      "baseline": 12895,
+      "actual": 2687,
+      "reductionPct": 79.2
+    },
+    {
+      "turn": 6,
+      "baseline": 13422,
+      "actual": 3214,
+      "reductionPct": 76.1
+    },
+    {
+      "turn": 7,
+      "baseline": 13963,
+      "actual": 3519,
+      "reductionPct": 74.8
+    },
+    {
+      "turn": 8,
+      "baseline": 15715,
+      "actual": 4308,
+      "reductionPct": 72.6
+    }
+  ],
+  "reductionPct": {
+    "meanPerTurn": 80.6,
+    "total": 80.6,
+    "peak": 72.6
+  },
+  "targetPct": 90,
+  "met": false,
+  "mechanisms": {
+    "jitFetches": 6,
+    "bytesNotFrontLoaded": 40817,
+    "compactedToolReturns": 3,
+    "rawBytesDivertedToDisk": 7812,
+    "historyStubs": 7,
+    "unchangedRereadsSkipped": 1
+  },
+  "note": "perTurn and reductionPct are computed over the aligned turns 1..8 only (baseline 8 turns, capped for cost, actual 14 turns); no full-run claim is made from a capped baseline."
+}

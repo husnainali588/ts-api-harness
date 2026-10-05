@@ -1,0 +1,63 @@
+no-unsafe-ts      pass      src/app.ts                        0 sites
+no-unsafe-ts      pass      src/http/idempotency.ts           0 sites
+no-unsafe-ts      pass      src/http/pagination.ts            0 sites
+no-unsafe-ts      pass      src/http/problem.ts               0 sites
+no-unsafe-ts      pass      src/http/route.ts                 0 sites
+no-unsafe-ts      pass      src/http/store.ts                 0 sites
+no-unsafe-ts      pass      src/routes/index.ts               0 sites
+no-unsafe-ts      pass      src/routes/users.ts               0 sites
+no-unsafe-ts      pass      src/schemas/user.ts               0 sites
+no-unsafe-ts      pass      test/app.test.ts                  0 sites
+no-unsafe-ts      pass      test/http/idempotency.test.ts     0 sites
+no-unsafe-ts      pass      test/http/pagination.test.ts      0 sites
+no-unsafe-ts      pass      test/http/problem.test.ts         0 sites
+no-unsafe-ts      pass      test/http/route.test.ts           0 sites
+no-unsafe-ts      pass      test/http/store.test.ts           0 sites
+no-unsafe-ts      pass      test/routes/index.test.ts         0 sites
+no-unsafe-ts      pass      test/routes/users.test.ts         0 sites
+no-unsafe-ts      pass      test/schemas/user.test.ts         0 sites
+problem-json      pass      src/app.ts                        3/3 error paths
+problem-json      pass      src/http/pagination.ts            2/2 error paths
+problem-json      pass      src/http/problem.ts               2/2 error paths
+problem-json      pass      src/routes/users.ts               5/5 error paths
+problem-probe     pass      app · unknown-route               1/1 probes
+problem-probe     pass      POST /v1/users · malformed-json   1/1 probes
+problem-probe     pass      POST /v1/users · empty-body       1/1 probes
+problem-probe     pass      POST /v1/users · missing-field    2/2 probes
+problem-probe     pass      POST /v1/users · wrong-type       2/2 probes
+problem-probe     pass      POST /v1/users · wrong-method     1/1 probes
+problem-probe     pass      POST /v1/users · idempotency      3/3 probes
+problem-probe     pass      POST /v1/users · duplicate        2/2 probes
+problem-probe     pass      GET /v1/users · list-bounds       3/3 probes
+problem-probe     pass      GET /v1/users/:id · malformed-id  1/1 probes
+problem-probe     pass      GET /v1/users/:id · unknown-id    1/1 probes
+problem-probe     pass      GET /v1/users/:id · wrong-method  1/1 probes
+problem-probe     pass      PATCH /v1/users/:id · malformed-json 1/1 probes
+problem-probe     pass      PATCH /v1/users/:id · empty-body  1/1 probes
+problem-probe     pass      PATCH /v1/users/:id · malformed-id 1/1 probes
+problem-probe     pass      PATCH /v1/users/:id · unknown-id  1/1 probes
+problem-probe     pass      DELETE /v1/users/:id · malformed-id 1/1 probes
+problem-probe     pass      DELETE /v1/users/:id · unknown-id 1/1 probes
+rest-conventions  pass      src/routes/users.ts               5/5 routes
+task-coverage     pass      task tasks/users.yaml             5/5 behaviours
+tests-mapped      pass      src/app.ts                        1/1 files
+tests-mapped      pass      src/http/idempotency.ts           1/1 files
+tests-mapped      pass      src/http/pagination.ts            1/1 files
+tests-mapped      pass      src/http/problem.ts               1/1 files
+tests-mapped      pass      src/http/route.ts                 1/1 files
+tests-mapped      pass      src/http/store.ts                 1/1 files
+tests-mapped      pass      src/routes/index.ts               1/1 files
+tests-mapped      pass      src/routes/users.ts               1/1 files
+tests-mapped      pass      src/schemas/user.ts               1/1 files
+tsc-strict        pass      tsconfig.json                     0 errors
+zod-boundary      pass      src/routes/users.ts               5/5 handlers
+────────────────────────────────────────────────────────────
+no-unsafe-ts      pass       0 sites
+problem-json      pass      12/12 error paths
+problem-probe     pass      25/25 probes
+rest-conventions  pass      5/5 routes
+task-coverage     pass      5/5 behaviours
+tests-mapped      pass      9/9 files
+tsc-strict        pass       0 errors
+zod-boundary      pass      5/5 handlers
+verdict           100%      → all rules pass

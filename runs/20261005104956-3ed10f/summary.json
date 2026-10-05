@@ -1,0 +1,91 @@
+{
+  "runId": "20261005104956-3ed10f",
+  "status": "green",
+  "reason": "finish gate green",
+  "task": {
+    "path": "tasks/orders-add-field.yaml",
+    "sha256": "e4f01b9ac2f19ecbce50a24093e6df1fa98769bcc4137702593da4e5eb1000ef",
+    "mode": "brownfield"
+  },
+  "fingerprint": {
+    "sha256": "6ad602a81a64391f6d889ae6136450da6434823bbb0d24e29d5b2d0aa88c6e3b",
+    "files": 21
+  },
+  "driver": "scripted",
+  "baseline": false,
+  "transports": [
+    "local"
+  ],
+  "servedBy": [
+    "scripted"
+  ],
+  "turns": 7,
+  "tokens": {
+    "turns": 7,
+    "totalInputTokens": 21173,
+    "totalOutputTokens": 3036,
+    "meanInputTokensPerTurn": 3025,
+    "peakInputTokens": 4783,
+    "source": "estimate"
+  },
+  "branch": "harness/orders-add-field-scripted-3ed10f",
+  "worktree": ".harness/worktrees/20261005104956-3ed10f",
+  "apiRoot": "fixtures/sample-api",
+  "gate": {
+    "green": true,
+    "lines": [
+      "tests        pass      PASS 63 / FAIL 0",
+      "continuity   pass      2/2 red cases now green",
+      "tsc          pass      0 errors",
+      "standards    pass      verdict 100% (9 rules pass, 0 n/a)",
+      "ratchet      pass      no new findings (0 before), touched files clean",
+      "contract     pass      no breaking change; additive: POST /v1/orders body.notes: new optional request field; POST /v1/orders 201.notes: new response field; GET /v1/orders 200.data[].notes: new response field; GET /v1/orders/:id 200.notes: new response field; PATCH /v1/orders/:id body.notes: new optional request field; PATCH /v1/orders/:id 200.notes: new response field"
+    ],
+    "unproven": []
+  },
+  "cost": {
+    "paid": false,
+    "requestedModel": null,
+    "cap": null,
+    "spentBefore": 560574,
+    "spentAfter": 560574
+  },
+  "writtenFiles": [
+    "test/orders/routes.test.ts",
+    "test/orders/store.test.ts",
+    "src/orders/schemas.ts",
+    "src/orders/store.ts"
+  ],
+  "contractChanges": {
+    "breaking": [],
+    "additive": [
+      "POST /v1/orders body.notes: new optional request field",
+      "POST /v1/orders 201.notes: new response field",
+      "GET /v1/orders 200.data[].notes: new response field",
+      "GET /v1/orders/:id 200.notes: new response field",
+      "PATCH /v1/orders/:id body.notes: new optional request field",
+      "PATCH /v1/orders/:id 200.notes: new response field"
+    ]
+  },
+  "prUrl": null,
+  "honesty": {
+    "proven": [
+      "tests        pass      PASS 63 / FAIL 0",
+      "continuity   pass      2/2 red cases now green",
+      "tsc          pass      0 errors",
+      "standards    pass      verdict 100% (9 rules pass, 0 n/a)",
+      "ratchet      pass      no new findings (0 before), touched files clean",
+      "contract     pass      no breaking change; additive: POST /v1/orders body.notes: new optional request field; POST /v1/orders 201.notes: new response field; GET /v1/orders 200.data[].notes: new response field; GET /v1/orders/:id 200.notes: new response field; PATCH /v1/orders/:id body.notes: new optional request field; PATCH /v1/orders/:id 200.notes: new response field"
+    ],
+    "unproven": [
+      "token numbers are estimates (scripted/replayed driver), not evidence"
+    ],
+    "outOfReach": [
+      "business-logic correctness beyond the tests",
+      "test quality beyond red→green",
+      "security",
+      "performance",
+      "persistence semantics"
+    ]
+  }
+}
