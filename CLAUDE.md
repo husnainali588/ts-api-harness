@@ -270,6 +270,11 @@ export default defineContext({ name: 'standards', fetch(key, ctx), frontLoad(ctx
 
 ### 5.5 Context: JIT + compaction (`core/context.ts`)
 
+**Model workspace (every run, live or scripted, both modes).** The model's file tools — reads as well as writes —
+are limited to the task's API root (the generated API folder for greenfield, the worktree copy of
+`fixtures/sample-api` for brownfield), plus read-only access to the task file. The model never sees the harness's
+own source, `CLAUDE.md` or `docs/`.
+
 **Actual mode:** tiny system prompt; first user message = task brief + state card. Everything else is fetched
 by tools: `list_files` (paths only, capped), `read_file` (line ranges, capped; re-reading an unchanged file
 returns `unchanged since turn N`), `search_code` (file:line hits, capped), `get_standard(ruleId)`,
@@ -279,8 +284,9 @@ History compaction: keep the last 6 exchanges verbatim; older tool results becom
 last test summary, last check summary, open blocks, red tests awaiting green) is re-rendered every turn.
 
 **Baseline mode (`--baseline`)** — same task, same driver, same tools, but: (a) the system prompt front-loads
-everything the fetchers could have returned (every text file in the workspace except `node_modules`, `.git`,
-lockfiles, `runs/`; plus every context plugin's `frontLoad()`), (b) tool results are `raw`, (c) no history
+everything the fetchers could have returned (every text file under the task's API root except `node_modules`
+and lockfiles, plus the task file, plus every context plugin's `frontLoad()` — never the whole repo, never the
+harness's own source), (b) tool results are `raw`, (c) no history
 compaction. The baseline/actual difference lives entirely in core — tools and plugins don't know which mode
 is on. Write this exact definition in the design note.
 
@@ -369,7 +375,8 @@ native transport is covered by recorded-fixture tests only.
 Each gate has tests in `test/gates/*.test.ts` that use the scripted driver to attempt the bypass and assert it
 is blocked.
 
-**G1 Path & scope guard (pre-hook on every file tool).** Rejects paths outside the worktree, `..`, symlinks
+**G1 Path & scope guard (pre-hook on every file tool).** Rejects paths outside the model workspace (§5.5: the
+task's API root inside the worktree; the task file is read-only) for reads and writes alike, `..`, symlinks
 leading out, every protected path in §1.7, and (brownfield) anything outside the accepted scope.
 
 **G2 Observed red (pre-hook on `write_file`/`edit_file` to a source file).** Source = any non-test `.ts` under
