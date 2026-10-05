@@ -61,7 +61,7 @@ for entry in "${EXAMPLES[@]}"; do
     out="$(npx --no-install harness check --api "$fixture" || true)"
     echo "$out" | grep -E "^$name\s" || fail "$name: no lines in the standards report"
     echo "$out" | grep -qE "^$name\s+FAIL\s+\S+:[0-9]+" || fail "$name: expected a FAIL line with a location"
-    echo "$out" | grep -qE "^$name\s+pass\s" || fail "$name: expected a pass line"
+    echo "$out" | grep -qE "^$name\s+(pass|FAIL)\s+[0-9]+/[0-9]+ " || fail "$name: expected its own summary line (passed/checked)"
     rm -rf "reports/$(echo "$out" | sed -n 's#^report *reports/\([^/]*\)/.*#\1#p')"
   fi
 
