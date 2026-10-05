@@ -1,0 +1,77 @@
+{
+  "runId": "20261005111042-d31bf6",
+  "status": "green",
+  "reason": "finish gate green",
+  "task": {
+    "path": "tasks/users.yaml",
+    "sha256": "5073335c5df28f36e69ca84db156b14887717b9f5d79add14db59148ae5a0c38",
+    "mode": "greenfield"
+  },
+  "fingerprint": {
+    "sha256": "0f220d5d507e24a5cff702af6f6c763cbfa0f88ec6e36f282d8b040f2fe4b049",
+    "files": 21
+  },
+  "driver": "scripted",
+  "baseline": false,
+  "transports": [
+    "local"
+  ],
+  "servedBy": [
+    "scripted"
+  ],
+  "turns": 14,
+  "tokens": {
+    "turns": 14,
+    "totalInputTokens": 44485,
+    "totalOutputTokens": 2248,
+    "meanInputTokensPerTurn": 3178,
+    "peakInputTokens": 4509,
+    "source": "estimate"
+  },
+  "branch": "harness/users-scripted-d31bf6",
+  "worktree": ".harness/worktrees/20261005111042-d31bf6",
+  "apiRoot": "generated/users-api",
+  "gate": {
+    "green": true,
+    "lines": [
+      "tests        pass      PASS 44 / FAIL 0",
+      "continuity   pass      2/2 red cases now green",
+      "tsc          pass      0 errors",
+      "standards    pass      verdict 100% (9 rules pass, 0 n/a)"
+    ],
+    "unproven": []
+  },
+  "cost": {
+    "paid": false,
+    "requestedModel": null,
+    "cap": null,
+    "spentBefore": 560574,
+    "spentAfter": 560574
+  },
+  "writtenFiles": [
+    "test/schemas/user.test.ts",
+    "test/routes/users.test.ts",
+    "src/schemas/user.ts",
+    "src/routes/users.ts"
+  ],
+  "contractChanges": null,
+  "prUrl": null,
+  "honesty": {
+    "proven": [
+      "tests        pass      PASS 44 / FAIL 0",
+      "continuity   pass      2/2 red cases now green",
+      "tsc          pass      0 errors",
+      "standards    pass      verdict 100% (9 rules pass, 0 n/a)"
+    ],
+    "unproven": [
+      "token numbers are estimates (scripted/replayed driver), not evidence"
+    ],
+    "outOfReach": [
+      "business-logic correctness beyond the tests",
+      "test quality beyond red→green",
+      "security",
+      "performance",
+      "persistence semantics"
+    ]
+  }
+}
