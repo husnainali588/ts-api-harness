@@ -5,7 +5,7 @@ import { join, resolve } from 'node:path';
 import { z } from 'zod';
 import { compactReport, runChecks } from './checks.js';
 import { Context } from './context.js';
-import type { ToolCall, ToolResult, ToolSpec, TurnResponse } from './driver.js';
+import { estimateRequestTokens, type ToolCall, type ToolResult, type ToolSpec, type TurnResponse } from './driver.js';
 import { execTool } from './exec.js';
 import { finishGate } from './finish.js';
 import { blockMessage, runHooks } from './hooks.js';
@@ -14,7 +14,7 @@ import type { HarnessServices, HookContext, ToolContext, ToolDefinition, ToolOut
 import { Evidence, RunState, fingerprint } from './state.js';
 import { loadTask, renderTaskBrief, type Task } from './task.js';
 import { mappedTests, runTests } from './tests.js';
-import { TokenLedger } from './tokens.js';
+import { DEFAULT_MAX_RUN_TOKENS, MIN_REMAINING_TO_START, SpendLedger, TokenLedger, effectiveCap, isPaidModel } from './tokens.js';
 import { createWorkspace, resolveInside, type Workspace } from './workspace.js';
 
 export type RunStatus = 'green' | 'fail' | 'unproven';
@@ -47,6 +47,9 @@ export interface RunOptions {
   maxConsecutiveBlocks?: number;
   maxOutputTokens?: number;
   maxRunTokens?: number;
+  /** Total input-token budget across all paid live runs (spend ledger). */
+  totalBudget?: number;
+  spendFile?: string;
   script?: string;
   runId?: string;
   env?: Readonly<Record<string, string | undefined>>;
@@ -73,6 +76,7 @@ export interface RunSummary {
   worktree: string;
   apiRoot: string; // relative to the worktree
   gate: GateResult | null;
+  cost: { paid: boolean; requestedModel: string | null; cap: number | null; spentBefore: number; spentAfter: number };
   prUrl: string | null;
   honesty: { proven: string[]; unproven: string[]; outOfReach: string[] };
 }
@@ -137,12 +141,28 @@ export async function runHarness(opts: RunOptions): Promise<RunSummary> {
   const task = loadTask(opts.taskPath, opts.repoRoot);
   const driverDef = findDriver(registry, opts.driverId).def;
   const runId = opts.runId ?? newRunId();
-  const evidence = new Evidence(opts.repoRoot, runId);
+  let evidenceRef: Evidence | undefined;
   const driver = driverDef.create({
     env: opts.env ?? process.env,
     ...(opts.script === undefined ? {} : { script: opts.script }),
-    rawLog: (entry) => evidence.driverLog(entry),
+    rawLog: (entry) => evidenceRef?.driverLog(entry),
   });
+
+  // Spend is capped by code (spec §1.10): the effective cap is min(per-run cap, budget remaining).
+  const paid = isPaidModel(driver.model);
+  const spend = new SpendLedger(opts.spendFile ?? join(opts.repoRoot, '.harness', 'spend.json'));
+  const spentBefore = spend.spent();
+  let cap = opts.maxRunTokens ?? (paid ? DEFAULT_MAX_RUN_TOKENS : undefined);
+  if (paid && cap !== undefined) {
+    const eff = effectiveCap(cap, opts.totalBudget, spentBefore);
+    if (eff.remaining !== undefined && eff.remaining < MIN_REMAINING_TO_START) {
+      throw new Error(`refusing to start a paid run: ${eff.remaining} input tokens left in the total budget (need at least ${MIN_REMAINING_TO_START})`);
+    }
+    cap = eff.cap;
+  }
+
+  const evidence = new Evidence(opts.repoRoot, runId);
+  evidenceRef = evidence;
   const workspace = await createWorkspace({
     repoRoot: opts.repoRoot,
     task,
@@ -237,9 +257,15 @@ export async function runHarness(opts: RunOptions): Promise<RunSummary> {
   let gate: GateResult | null = null;
   let consecutiveBlocks = 0;
   loop: for (run.turn = 1; run.turn <= maxTurns; run.turn += 1) {
+    const request = { system: context.system(), messages: context.render(run.turn), tools: specs, maxOutputTokens: opts.maxOutputTokens ?? 8192 };
+    if (cap !== undefined && ledger.totalInput() + estimateRequestTokens(request) > cap) {
+      status = 'unproven';
+      reason = `stopped by cost cap (${ledger.totalInput()} spent + ~${estimateRequestTokens(request)} next turn > ${cap} input tokens)`;
+      break;
+    }
     let res: TurnResponse;
     try {
-      res = await driver.turn({ system: context.system(), messages: context.render(run.turn), tools: specs, maxOutputTokens: opts.maxOutputTokens ?? 8192 });
+      res = await driver.turn(request);
     } catch (e) {
       status = 'unproven';
       reason = `driver error: ${e instanceof Error ? e.message : String(e)}`;
@@ -247,6 +273,9 @@ export async function runHarness(opts: RunOptions): Promise<RunSummary> {
       break;
     }
     ledger.record(run.turn, res.usage);
+    if (paid && !res.model.endsWith(':free')) {
+      spend.add({ runId, driver: driverDef.id, model: res.model, inputTokens: res.usage.inputTokens, outputTokens: res.usage.outputTokens });
+    }
     transports.add(res.transport);
     servedBy.add(res.model);
     evidence.transcript({ turn: run.turn, response: res });
@@ -284,9 +313,9 @@ export async function runHarness(opts: RunOptions): Promise<RunSummary> {
         break;
       }
     }
-    if (opts.maxRunTokens !== undefined && ledger.totalInput() >= opts.maxRunTokens) {
+    if (cap !== undefined && ledger.totalInput() >= cap) {
       status = 'unproven';
-      reason = `stopped by cost cap (${ledger.totalInput()} >= ${opts.maxRunTokens} input tokens)`;
+      reason = `stopped by cost cap (${ledger.totalInput()} >= ${cap} input tokens)`;
       break;
     }
   }
@@ -312,6 +341,7 @@ export async function runHarness(opts: RunOptions): Promise<RunSummary> {
     worktree: evidence.rel(workspace.worktree),
     apiRoot: workspace.apiRel,
     gate,
+    cost: { paid, requestedModel: driver.model ?? null, cap: cap ?? null, spentBefore, spentAfter: spend.spent() },
     prUrl: null,
     honesty: {
       proven: gate?.green === true ? gate.lines : [],

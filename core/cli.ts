@@ -129,7 +129,9 @@ export async function runCommand(args: string[], io: Io): Promise<number> {
   loadDotEnv();
   const taskPath = relative(HARNESS_ROOT, resolve(process.cwd(), values.task));
   const maxTurns = intFlag(values['max-turns'], 'max-turns');
+  // CLI flags override env values (the local .env may hold older, higher limits).
   const maxRunTokens = intFlag(values['max-run-tokens'], 'max-run-tokens') ?? intFlag(process.env.HARNESS_MAX_RUN_TOKENS, 'HARNESS_MAX_RUN_TOKENS');
+  const totalBudget = intFlag(values['total-budget'], 'total-budget') ?? intFlag(process.env.HARNESS_TOTAL_BUDGET, 'HARNESS_TOTAL_BUDGET');
   const summary = await runHarness({
     harnessRoot: HARNESS_ROOT,
     repoRoot: HARNESS_ROOT,
@@ -138,6 +140,7 @@ export async function runCommand(args: string[], io: Io): Promise<number> {
     baseline: values.baseline,
     ...(maxTurns === undefined ? {} : { maxTurns }),
     ...(maxRunTokens === undefined ? {} : { maxRunTokens }),
+    ...(totalBudget === undefined ? {} : { totalBudget }),
     ...(values.script === undefined ? {} : { script: resolve(process.cwd(), values.script) }),
     log: (line) => io.out(line),
   });
@@ -145,6 +148,9 @@ export async function runCommand(args: string[], io: Io): Promise<number> {
   io.out(`status     ${summary.status.toUpperCase()} — ${summary.reason}`);
   io.out(`evidence   runs/${summary.runId}/ (branch ${summary.branch})`);
   io.out(`tokens     input ${t.totalInputTokens}, output ${t.totalOutputTokens}, ${t.turns} turns, peak ${t.peakInputTokens} (${t.source})`);
+  const c = summary.cost;
+  io.out(`model      requested ${c.requestedModel ?? '(local)'}, served ${summary.servedBy.join(', ') || '-'} via ${summary.transports.join(', ') || '-'}`);
+  io.out(`spend      ${c.paid ? `paid — run cap ${c.cap ?? 'none'}, ledger ${c.spentBefore} → ${c.spentAfter} input tokens` : 'free (not counted)'}`);
   return summary.status === 'green' ? 0 : 1;
 }
 

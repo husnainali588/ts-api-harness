@@ -1,0 +1,20 @@
+{
+  "id": "msg_01FixtureRecorded",
+  "type": "message",
+  "role": "assistant",
+  "model": "claude-haiku-4-5-20251001",
+  "content": [
+    { "type": "text", "text": "I'll read the task first." },
+    { "type": "tool_use", "id": "toolu_01A", "name": "get_task", "input": {} },
+    { "type": "tool_use", "id": "toolu_01B", "name": "list_files", "input": { "dir": "src" } }
+  ],
+  "stop_reason": "tool_use",
+  "stop_sequence": null,
+  "usage": {
+    "input_tokens": 1200,
+    "cache_creation_input_tokens": 300,
+    "cache_read_input_tokens": 500,
+    "output_tokens": 85,
+    "service_tier": "standard"
+  }
+}

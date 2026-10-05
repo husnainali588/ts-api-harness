@@ -37,4 +37,13 @@
 - Probe families and allowed statuses: malformed-json {400}, empty-body {400,422}, missing-field/wrong-type {422}, malformed-id {400,404,422}, unknown-id {404} (+422 with a body), unknown-route {404}, wrong-method {404,405}, list-bounds {400,422}, duplicate {409}, idempotency replay identical + reuse {409}.
 - Added rule `task-coverage` (not in the original rule list): G3 had no check that the task was built at all, so finish on the untouched scaffold would pass; it maps behaviour verbs (create/list/get/update/delete) to required routes, and brownfield task fields to schema keys.
 - G3 continuity treats a file-level load red as satisfied once that file loads with ≥1 passing case and nothing failing or skipped.
+
+## Drivers (Phase 6) — checked against OpenRouter on 2026-10-05
+- OpenRouter Chat Completions: `https://openrouter.ai/api/v1/chat/completions`, `Authorization: Bearer <OPENROUTER_API_KEY>`; usage `prompt_tokens` (already includes cached tokens; `prompt_tokens_details.cached_tokens` is a subset), `completion_tokens`; `tools`/`tool_choice` in OpenAI shape.
+- OpenRouter Anthropic-compatible Messages endpoint: base URL `https://openrouter.ai/api` (SDK appends `/v1/messages`), auth `Authorization: Bearer <key>` (SDK `authToken`), model ids `anthropic/<model>`; usage `input_tokens` + `cache_creation_input_tokens` + `cache_read_input_tokens` (summed = full input), `output_tokens`.
+- Default models exist (public `/api/v1/models`): `anthropic/claude-haiku-4.5` ($1 / $5 per M in/out, 200k ctx, tools) and `openai/gpt-5.4-mini` ($0.75 / $4.50 per M, 400k ctx, tools). Native ids: `claude-haiku-4-5-20251001`, `gpt-5.4-mini`.
+- gpt-5.4-mini does not accept `temperature` → never sent; uses `max_completion_tokens`, `reasoning_effort: "low"` (lowest broadly-supported level; spec says reasoning off or lowest). Haiku 4.5: no thinking parameter sent (off by default), `max_tokens` required.
+- Both drivers pass base URL and auth explicitly in code; `ANTHROPIC_BASE_URL` / `ANTHROPIC_AUTH_TOKEN` are never read or set.
+- Free tool-capable models on OpenRouter today include `google/gemma-4-31b-it:free`, `qwen/qwen3.8-27b:free`, `nvidia/nemotron-3-super-120b-a12b:free` (rehearsal candidates; request-limited).
+
 - Wrong method on an existing path → 404 problem (Express has no automatic 405); the probe's allowed set for "wrong method" is {404, 405}.

@@ -1,0 +1,28 @@
+{
+  "id": "chatcmpl-FixtureRecorded",
+  "object": "chat.completion",
+  "created": 1791200000,
+  "model": "gpt-5.4-mini-2026-03-17",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": null,
+        "refusal": null,
+        "tool_calls": [
+          { "id": "call_A", "type": "function", "function": { "name": "get_task", "arguments": "{}" } },
+          { "id": "call_B", "type": "function", "function": { "name": "list_files", "arguments": "{\"dir\":\"src\"}" } }
+        ]
+      },
+      "finish_reason": "tool_calls"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 2000,
+    "completion_tokens": 90,
+    "total_tokens": 2090,
+    "prompt_tokens_details": { "cached_tokens": 1024 },
+    "completion_tokens_details": { "reasoning_tokens": 40 }
+  }
+}

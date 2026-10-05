@@ -52,6 +52,8 @@ export interface TurnResponse {
 
 export interface Driver {
   readonly id: string;
+  /** The model id requested from a live provider; absent for local (scripted/replay) drivers, which cost nothing. */
+  readonly model?: string;
   turn(req: TurnRequest): Promise<TurnResponse>;
 }
 
