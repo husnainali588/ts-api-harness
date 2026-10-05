@@ -114,9 +114,9 @@ template score 100%; recorded-fixture tests cover both drivers on both transport
   report (bench) **were not run** because the budget was stopped. A free-model rehearsal stopped on a 429 at turn 6.
 - **The default models are unverified**: the claude default is now Claude Sonnet 5.5 (never run live); the openai
   default GPT-5.4 Mini passed only its 3-turn smoke test.
-- The shipped PR (#2) and the brownfield run are **scripted-driver** evidence: real gates, scripted code
-  (`runs/20261005104836-119e72`: tests PASS 44, continuity 2/2, tsc 0 errors, standards 100% with 9 rules incl.
-  problem-probe 25/25; `runs/20261005104956-3ed10f`: ratchet pass, contract pass with additive `notes` changes).
+- The shipped PR ([#1](https://github.com/husnainali588/ts-api-harness/pull/1)) and the brownfield run are
+  **scripted-driver** evidence: real gates, scripted code (`runs/20261005111042-d31bf6`: tests PASS 44, continuity 2/2,
+  tsc 0 errors, standards 100% with 9 rules incl. problem-probe 25/25; `runs/20261005104956-3ed10f`: ratchet pass, contract pass with additive `notes` changes).
 
 **What the checks skip or cannot see** (reported as UNPROVEN, never green): anything a rule could not run (missing
 dependencies, unbootable app, gh unavailable). **What a human must still verify:** business-logic correctness beyond

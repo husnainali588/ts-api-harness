@@ -62,7 +62,7 @@ see `docs/decisions.md`).
 
 ## Evidence
 
-**Pull request opened by the harness:** [PR #2](https://github.com/husnainali588/ts-api-harness/pull/2) — shipped by
+**Pull request opened by the harness:** [PR #1](https://github.com/husnainali588/ts-api-harness/pull/1) — shipped by
 the harness's own ship step (G4) after every gate was green, from a run with the scripted driver (see below).
 
 Honest summary (details and numbers in [docs/design.md §5](docs/design.md#5-honesty-boundary)):
@@ -77,9 +77,10 @@ Honest summary (details and numbers in [docs/design.md §5](docs/design.md#5-hon
   green on either driver.** The OpenAI greenfield run, the brownfield run and the live token report were **not run**
   (budget). The default models are unverified.
 - **Scripted-driver evidence (real gates, scripted code):** greenfield shipped as
-  [PR #2](https://github.com/husnainali588/ts-api-harness/pull/2) (titled as scripted) —
-  `runs/20261005104836-119e72`, standards 100% incl. problem-probe 25/25
-  (`reports/check-20261005105215-10cef9/standards.txt`); brownfield `runs/20261005104956-3ed10f` green with an additive
+  [PR #1](https://github.com/husnainali588/ts-api-harness/pull/1) (titled as scripted) —
+  `runs/20261005111042-d31bf6`, standards 100% incl. problem-probe 25/25
+  (`reports/20261005111042-d31bf6/standards.txt`; the identical earlier run `runs/20261005104836-119e72` checked with
+  `harness check`: `reports/check-20261005105215-10cef9/standards.txt`); brownfield `runs/20261005104956-3ed10f` green with an additive
   contract change only.
 - **Tokens:** `tokens/20261005105034-a7da99.json` — offline estimate, `evidence: false`, 80.6% mean per-turn reduction
   (target >90% not met); `tokens/live-runs.json` — real per-turn input of every live run (no live baseline).

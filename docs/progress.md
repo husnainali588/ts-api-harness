@@ -389,8 +389,23 @@ CHANGE OF PLAN (user): no more paid runs (keys removed from .env); deliver with 
 - Tests: 25 files / 191 tests; grade.sh 4 PASS, 3 UNPROVEN, 0 FAIL.
 
 **Pull requests**
-- https://github.com/husnainali588/ts-api-harness/pull/2 — open, scripted driver, labelled as such.
-- https://github.com/husnainali588/ts-api-harness/pull/1 — Phase 9 proof, closed.
+- https://github.com/husnainali588/ts-api-harness/pull/1 — **public repo**, open, opened by the harness's ship step
+  from scripted run `20261005111042-d31bf6`, titled as a scripted-driver run.
+- Earlier PRs live in the private repo `husnainali588/ts-api-harness-private`: #2 (open, scripted run
+  `20261005104836-119e72`) and #1 (Phase 9 proof, closed). Links to `ts-api-harness/pull/…` above this section were
+  written before the move and refer to that private repo.
+
+## Publication
+
+- The original repo was renamed to `ts-api-harness-private` and kept private and untouched (its `submission` tag,
+  branches and PRs unchanged; local remote `private`).
+- Local `main` was rewritten with `git filter-branch` so `docs/assignment/`, `docs/AUTORUN.md` and
+  `docs/BUILD_PROMPTS.md` never existed (29 commits, final tree identical); backup of every pre-rewrite ref:
+  `.harness/pre-rewrite-backup.bundle` (local, gitignored).
+- New public repo `husnainali588/ts-api-harness`: `main` only, no tags. Verified on a fresh clone: `git log --all` on
+  the three paths prints nothing; full-history secret scan clean.
+- Scripted greenfield run `20261005111042-d31bf6` shipped to it as PR #1 (GREEN: tests PASS 44, continuity 2/2, tsc
+  0 errors, standards 100%, problem-probe 25/25).
 
 **UNPROVEN / BLOCKED**
 - No live run finished green on either driver; Claude greenfield failed three times (Haiku 4.5, cost caps).
