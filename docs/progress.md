@@ -195,3 +195,23 @@ Plan:
 Result: DONE — commit "feat(core): brownfield scope, ratchet and contract gates".
 - Moved shared route analysis to core/analysis.ts (used by rules and by the contract gate); probe uses routeRefs.
 - Tests: 20 files / 160 tests passed; typecheck clean; leak test green.
+- Commit `c888d01`, pushed.
+
+## Phase 9 — ship step (G4)
+
+Plan:
+1. core/ship.ts: preconditions (green G3, nothing unproven, not baseline), protected-branch refusal (main, master,
+   develop, trunk, release/*, prod*, remote default), evidence copied into the branch, selective staging (API output or
+   brownfield written files + runs/reports/tokens of the run; never `add -A`; node_modules always excluded), staged-diff
+   secret scan (key regexes + literal env secret values), commit with gate summary, `push -u`, `gh pr create
+   --body-file runs/<id>/pr.md`, PR URL into summary.json. git via execFile arrays; no --force/--no-verify.
+2. `harness ship --run <id>` and `harness run --ship`.
+3. Bare-repo tests; then a scripted greenfield run + --ship against the real GitHub repo, then close that PR.
+
+Result: DONE — commit "feat(core): ship step with G4 preconditions".
+- Tests: 21 files / 166 tests passed; typecheck clean; leak test green.
+- Real PR proof: scripted run `20261005090611-08390b` (GREEN through the real G3) shipped
+  https://github.com/husnainali588/ts-api-harness/pull/1 — 34 files, all under generated/users-api/, runs/, reports/;
+  closed with a comment and its remote branch deleted (evidence PRs come from Phase 12).
+- Found and fixed during the bare-repo test: a symlinked node_modules was staged when the target repo's .gitignore only
+  had `node_modules/` → ship now excludes node_modules by pathspec regardless of .gitignore.
