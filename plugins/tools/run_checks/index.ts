@@ -3,7 +3,7 @@ import { defineTool } from '../../../core/sdk.js';
 
 export default defineTool({
   name: 'run_checks',
-  description: 'Run the API standards checks (Zod boundaries, problem+json, strict tsc, unsafe TS, REST conventions, test mapping). Returns failing lines with file:line and a verdict.',
+  description: 'Run the standards checks; returns failing file:line lines and a verdict.',
   input: z.object({}),
   async run(_input, ctx) {
     const out = await ctx.services.runChecks();

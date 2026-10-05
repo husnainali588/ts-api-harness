@@ -3,7 +3,7 @@ import { defineTool } from '../../../core/sdk.js';
 
 export default defineTool({
   name: 'run_tests',
-  description: 'Run the full test suite with the harness runner. Returns PASS/FAIL counts and the failing tests. Only this records red/green.',
+  description: 'Run all tests; returns PASS/FAIL counts and failures. Only this records red/green.',
   input: z.object({}),
   async run(_input, ctx) {
     const out = await ctx.services.runTests();

@@ -79,6 +79,7 @@ export interface ToolOutput {
   signal?: 'finish'; // the finish tool asks the loop to run the finish gate
   wrote?: string[]; // API-root-relative files this call wrote
   stub?: string; // one-line replacement once compaction drops this result
+  cached?: boolean; // the summary elides content the model already has (e.g. an unchanged re-read)
 }
 
 // ── tools ─────────────────────────────────────────────────────────────────────────────────────────────
@@ -90,6 +91,8 @@ export interface ToolDefinition<S extends z.ZodType = z.ZodType> {
   readonly input: S;
   /** Tools that only read never trigger write guards. Default false. */
   readonly writes?: boolean;
+  /** Just-in-time context fetchers (counted in the token report). Default false. */
+  readonly fetch?: boolean;
   run(input: z.output<S>, ctx: ToolContext): ToolOutput | Promise<ToolOutput>;
 }
 
@@ -216,6 +219,7 @@ const DefinitionSchemas = {
     description: z.string().min(1),
     input: zodSchema,
     writes: z.boolean().optional(),
+    fetch: z.boolean().optional(),
     run: fn,
   }),
   hook: z.object({

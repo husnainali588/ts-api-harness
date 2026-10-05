@@ -8,10 +8,11 @@ const CAP = 40;
 
 export default defineTool({
   name: 'search_code',
-  description: `Search the API workspace for a regular expression; returns file:line hits (max ${CAP}).`,
+  description: `Regex search; returns file:line hits (max ${CAP}).`,
+  fetch: true,
   input: z.object({
-    pattern: z.string().min(1).describe('JavaScript regular expression'),
-    glob: z.string().default('**/*.ts').describe('files to search, relative to the API root'),
+    pattern: z.string().min(1),
+    glob: z.string().default('**/*.ts'),
     ignoreCase: z.boolean().default(false),
   }),
   async run(input, ctx) {

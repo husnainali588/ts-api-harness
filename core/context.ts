@@ -22,6 +22,16 @@ export interface ContextOptions {
   keepExchanges?: number;
 }
 
+const ELIDE_OVER = 200;
+
+/** Long strings inside old tool-call inputs (e.g. written file content) become a short marker. */
+export function elideInput(value: unknown): unknown {
+  if (typeof value === 'string') return value.length > ELIDE_OVER ? `[${value.length} chars elided from history]` : value;
+  if (Array.isArray(value)) return value.map(elideInput);
+  if (typeof value === 'object' && value !== null) return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, elideInput(v)]));
+  return value;
+}
+
 export class Context {
   private readonly history: Message[] = [];
   private readonly stubs = new Map<string, string>(); // tool callId → one-line stub used once compacted
@@ -34,6 +44,11 @@ export class Context {
 
   system(): string {
     return this.opts.frontLoad === undefined ? SYSTEM_PROMPT : `${SYSTEM_PROMPT}\n\n# Workspace and reference material\n${this.opts.frontLoad}`;
+  }
+
+  /** Baseline mode refreshes the front-loaded material every turn, so it always reflects the workspace. */
+  setFrontLoad(text: string): void {
+    this.opts.frontLoad = text;
   }
 
   stateCard(turn: number): string {
@@ -88,7 +103,12 @@ export class Context {
         }
       }
     }
+    let lastAssistant = -1;
+    for (let i = this.history.length - 1; i >= 0 && lastAssistant < 0; i -= 1) if (this.history[i]?.role === 'assistant') lastAssistant = i;
     const compacted = this.history.map((msg, i): Message => {
+      // Large tool-call inputs (e.g. file content the model wrote) are elided from every exchange but the latest:
+      // the result already says what was written, and read_file brings it back if needed.
+      if (msg.role === 'assistant') return i === lastAssistant ? msg : { ...msg, toolCalls: msg.toolCalls.map((c) => ({ ...c, input: elideInput(c.input) })) };
       if (i >= cutoff || msg.role !== 'tool') return msg;
       return {
         role: 'tool',

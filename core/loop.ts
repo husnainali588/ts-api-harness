@@ -1,7 +1,9 @@
 // The agent loop (spec §5.2). The model decides what to do; the harness decides whether it is allowed,
 // whether it worked and whether the run is done.
 import { randomBytes } from 'node:crypto';
+import { readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
+import fg from 'fast-glob';
 import { z } from 'zod';
 import { compactReport, runChecks } from './checks.js';
 import { Context } from './context.js';
@@ -125,10 +127,23 @@ function stubFor(call: ToolCall): string {
   return `[${call.name} ${input.length > 100 ? `${input.slice(0, 100)}…` : input} — dropped, re-run if needed]`;
 }
 
+/** Drops JSON-Schema noise that costs tokens every turn and tells the model nothing (safe-integer bounds). */
+function compactSchema(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(compactSchema);
+  if (typeof value !== 'object' || value === null) return value;
+  const out: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(value)) {
+    if ((k === 'maximum' || k === 'minimum') && typeof v === 'number' && Math.abs(v) >= Number.MAX_SAFE_INTEGER) continue;
+    out[k] = compactSchema(v);
+  }
+  return out;
+}
+
 export function toolSpecs(tools: readonly ToolDefinition[]): ToolSpec[] {
   return tools.map((t) => {
     const { $schema: _ignored, ...schema } = z.toJSONSchema(t.input, { io: 'input' });
-    return { name: t.name, description: t.description, inputSchema: schema };
+    const compact = compactSchema(schema);
+    return { name: t.name, description: t.description, inputSchema: typeof compact === 'object' && compact !== null ? Object.fromEntries(Object.entries(compact)) : {} };
   });
 }
 
@@ -186,7 +201,24 @@ export async function runHarness(opts: RunOptions): Promise<RunSummary> {
   });
   const transports = new Set<string>();
   const servedBy = new Set<string>();
-  evidence.event({ type: 'run-start', runId, task: task.path, driver: driverDef.id, baseline, branch: workspace.branch, apiRoot: workspace.apiRel });
+  const fetchCtx = () => ({ apiRoot: workspace.apiRoot, harnessRoot: opts.harnessRoot, task, rules: registry.rules.map((r) => r.def) });
+  /** Baseline front-load (spec §5.5): every text file under the API root (no node_modules, no lockfiles), the task
+   * file, and every context plugin's frontLoad(). Never the harness's own source. */
+  const buildFrontLoad = async (): Promise<string> => {
+    const parts: string[] = [];
+    const files = (await fg('**/*', { cwd: workspace.apiRoot, onlyFiles: true, dot: true, ignore: ['**/node_modules/**', '**/package-lock.json', '**/*.lock'] })).sort();
+    for (const file of files) {
+      const content = readFileSync(join(workspace.apiRoot, file), 'utf8');
+      if (!content.includes('\0')) parts.push(`## ${file}\n${content}`);
+    }
+    parts.push(`# Task file ${task.path}\n${task.text}`);
+    for (const c of registry.contexts) parts.push(`# ${c.def.name}\n${await c.def.frontLoad(fetchCtx())}`);
+    return parts.join('\n\n');
+  };
+  const mechanisms = { jitFetches: 0, bytesNotFrontLoaded: 0, compactedToolReturns: 0, rawBytesDivertedToDisk: 0, historyStubs: 0, unchangedRereadsSkipped: 0 };
+  const frontLoadBytes = Buffer.byteLength(await buildFrontLoad());
+  if (!baseline) mechanisms.bytesNotFrontLoaded = frontLoadBytes;
+  evidence.event({ type: 'run-start', runId, task: task.path, driver: driverDef.id, baseline, branch: workspace.branch, apiRoot: workspace.apiRel, frontLoadBytes });
   log(`run ${runId}: ${task.path} with driver ${driverDef.id}${baseline ? ' (baseline)' : ''}`);
 
   const toolCtx = (tool: ToolDefinition): ToolContext => ({
@@ -201,7 +233,7 @@ export async function runHarness(opts: RunOptions): Promise<RunSummary> {
     context: async (name, key) => {
       const found = registry.contexts.find((c) => c.def.name === name);
       if (found === undefined) return `unknown context "${name}"`;
-      return found.def.fetch(key, { apiRoot: workspace.apiRoot, harnessRoot: opts.harnessRoot, task, rules: registry.rules.map((r) => r.def) });
+      return found.def.fetch(key, fetchCtx());
     },
     saveRaw: (label, content) => evidence.saveRaw(label, content),
     memory: state.toolMemory(tool.name),
@@ -237,7 +269,13 @@ export async function runHarness(opts: RunOptions): Promise<RunSummary> {
     for (const rel of out.wrote ?? []) state.recordWrite(rel);
     const post = await runHooks('post', registry.hooks, call, { ...hookCtx, output: out }, (e) => evidence.event({ turn: run.turn, ...e }));
     const rawPath = out.raw === undefined ? undefined : evidence.saveRaw(call.name, out.raw);
-    evidence.event({ type: 'tool', turn: run.turn, tool: call.name, callId: call.id, isError: out.isError === true, summary: out.summary.slice(0, 300), raw: rawPath });
+    if (tool.fetch === true) mechanisms.jitFetches += 1;
+    if (!baseline && out.raw !== undefined) {
+      mechanisms.compactedToolReturns += 1;
+      mechanisms.rawBytesDivertedToDisk += Buffer.byteLength(out.raw);
+    }
+    if (!baseline && out.cached === true) mechanisms.unchangedRereadsSkipped += 1;
+    evidence.event({ type: 'tool', turn: run.turn, tool: call.name, callId: call.id, isError: out.isError === true, summary: out.summary.slice(0, 300), raw: rawPath, fetch: tool.fetch === true });
     // Record notes go to events.jsonl only; they cost the model no tokens.
     let content = baseline ? (out.raw ?? out.summary) : rawPath === undefined ? out.summary : `${out.summary}\n(full output kept by the harness: ${rawPath})`;
     if (post.blocked !== null) content += `\n${blockMessage(post.blocked)}`;
@@ -257,7 +295,9 @@ export async function runHarness(opts: RunOptions): Promise<RunSummary> {
   let gate: GateResult | null = null;
   let consecutiveBlocks = 0;
   loop: for (run.turn = 1; run.turn <= maxTurns; run.turn += 1) {
+    if (baseline) context.setFrontLoad(await buildFrontLoad());
     const request = { system: context.system(), messages: context.render(run.turn), tools: specs, maxOutputTokens: opts.maxOutputTokens ?? 8192 };
+    if (!baseline) mechanisms.historyStubs = Math.max(mechanisms.historyStubs, context.stubbedResults());
     if (cap !== undefined && ledger.totalInput() + estimateRequestTokens(request) > cap) {
       status = 'unproven';
       reason = `stopped by cost cap (${ledger.totalInput()} spent + ~${estimateRequestTokens(request)} next turn > ${cap} input tokens)`;
@@ -350,7 +390,7 @@ export async function runHarness(opts: RunOptions): Promise<RunSummary> {
     },
   };
   evidence.writeJson('summary.json', summary);
-  evidence.writeJson('tokens.json', { runId, turns: ledger.turns, totals });
+  evidence.writeJson('tokens.json', { runId, task: task.path, taskSha256: task.sha256, driver: driverDef.id, baseline, completed: status === 'green', stoppedBy: reason, transports: [...transports], servedBy: [...servedBy], turns: ledger.turns, totals, mechanisms });
   evidence.event({ type: 'run-end', status, reason });
   log(`run ${runId}: ${status.toUpperCase()} — ${reason} (${totals.turns} turns, ${totals.totalInputTokens} input tokens, ${totals.source})`);
   return summary;

@@ -10,9 +10,10 @@ const Seen = z.object({ sha: z.string(), turn: z.number() });
 
 export default defineTool({
   name: 'read_file',
-  description: `Read a file from the API workspace with line numbers. Use startLine/endLine for ranges (max ${MAX_LINES} lines per call).`,
+  description: `Read file lines (numbered, max ${MAX_LINES} per call).`,
+  fetch: true,
   input: z.object({
-    path: z.string().describe('path relative to the API root'),
+    path: z.string(),
     startLine: z.number().int().min(1).default(1),
     endLine: z.number().int().min(1).optional(),
   }),
@@ -36,7 +37,7 @@ export default defineTool({
     const seen = Seen.safeParse(ctx.memory.get(key));
     ctx.memory.set(key, { sha, turn: seen.success && seen.data.sha === sha ? seen.data.turn : ctx.turn });
     if (seen.success && seen.data.sha === sha) {
-      return { summary: `${input.path}:${start}-${end} unchanged since turn ${seen.data.turn}`, raw: `${header}\n${body}`, stub };
+      return { summary: `${input.path}:${start}-${end} unchanged since turn ${seen.data.turn}`, raw: `${header}\n${body}`, stub, cached: true };
     }
     return { summary: `${header}\n${body}`, stub };
   },

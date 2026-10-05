@@ -38,6 +38,11 @@
 - Added rule `task-coverage` (not in the original rule list): G3 had no check that the task was built at all, so finish on the untouched scaffold would pass; it maps behaviour verbs (create/list/get/update/delete) to required routes, and brownfield task fields to schema keys.
 - G3 continuity treats a file-level load red as satisfied once that file loads with ≥1 passing case and nothing failing or skipped.
 
+## Context and tokens (Phase 7)
+- Baseline (exact definition for the design note): same task, same driver, same tools; the system prompt front-loads every text file under the task's API root (no node_modules, no lockfiles), the task file, and every context plugin's `frontLoad()` (standards docs, all schemas, the task), refreshed every turn so it reflects the workspace; tool results are raw; no history compaction.
+- Actual: ~220-token system prompt; first message = task brief + state card re-rendered every turn; tools return summaries (raw to `runs/<id>/raw/`); last 6 exchanges verbatim, older tool results become one-line stubs; large tool-call inputs (file content) elided from all but the latest exchange; unchanged re-reads return "unchanged since turn N".
+- Token report is computed only from the two runs' ledgers (`runs/<id>/tokens.json`); reductions use the aligned turns when the baseline is capped and say so in `note`; `bench` refuses a local (scripted) driver unless `--offline`, and such reports are marked `evidence: false`.
+
 ## Drivers (Phase 6) — checked against OpenRouter on 2026-10-05
 - OpenRouter Chat Completions: `https://openrouter.ai/api/v1/chat/completions`, `Authorization: Bearer <OPENROUTER_API_KEY>`; usage `prompt_tokens` (already includes cached tokens; `prompt_tokens_details.cached_tokens` is a subset), `completion_tokens`; `tools`/`tool_choice` in OpenAI shape.
 - OpenRouter Anthropic-compatible Messages endpoint: base URL `https://openrouter.ai/api` (SDK appends `/v1/messages`), auth `Authorization: Bearer <key>` (SDK `authToken`), model ids `anthropic/<model>`; usage `input_tokens` + `cache_creation_input_tokens` + `cache_read_input_tokens` (summed = full input), `output_tokens`.

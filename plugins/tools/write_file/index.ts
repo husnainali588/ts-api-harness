@@ -5,10 +5,10 @@ import { defineTool } from '../../../core/sdk.js';
 
 export default defineTool({
   name: 'write_file',
-  description: 'Create or overwrite a file in the API workspace with the full content.',
+  description: 'Create or overwrite a file with full content.',
   writes: true,
   input: z.object({
-    path: z.string().describe('path relative to the API root'),
+    path: z.string(),
     content: z.string(),
   }),
   run(input, ctx) {

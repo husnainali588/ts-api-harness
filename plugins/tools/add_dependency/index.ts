@@ -13,7 +13,7 @@ export const ALLOWLIST: Readonly<Record<string, 'dev' | 'prod'>> = {
 
 export default defineTool({
   name: 'add_dependency',
-  description: `Install an allowlisted npm package into the API (${Object.keys(ALLOWLIST).join(', ')}).`,
+  description: `Install an allowlisted package: ${Object.keys(ALLOWLIST).join(', ')}.`,
   input: z.object({ name: z.string().min(1) }),
   async run(input, ctx) {
     const kind = ALLOWLIST[input.name];

@@ -4,6 +4,7 @@ import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 import { exec } from './exec.js';
+import { bench } from './bench.js';
 import { runChecks } from './checks.js';
 import { newRunId, runHarness } from './loop.js';
 import { loadRegistry, type Registry } from './registry.js';
@@ -14,7 +15,7 @@ export const HARNESS_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..
 const USAGE = `usage: harness <command> [options]
 
   run     --task <file> --driver <id> [--baseline] [--ship] [--max-turns N] [--max-run-tokens N] [--total-budget N] [--script <file>]
-  bench   --task <file> --driver <id> [--baseline-turns N] [--actual-run <runId>] [--max-run-tokens N] [--total-budget N]
+  bench   --task <file> --driver <id> [--baseline-turns N] [--actual-run <runId>] [--max-run-tokens N] [--total-budget N] [--offline --script <file>]
   check   --api <path> [--task <file>]
   ship    --run <runId>
   plugins                 list discovered drivers, tools, hooks, rules and context fetchers
@@ -171,7 +172,53 @@ export async function checkCommand(args: string[], io: Io): Promise<number> {
   return report.green ? 0 : 1;
 }
 
+export async function benchCommand(args: string[], io: Io): Promise<number> {
+  const { values } = parseArgs({
+    args,
+    strict: true,
+    options: {
+      task: { type: 'string' },
+      driver: { type: 'string' },
+      'baseline-turns': { type: 'string' },
+      'actual-run': { type: 'string' },
+      'max-turns': { type: 'string' },
+      'max-run-tokens': { type: 'string' },
+      'total-budget': { type: 'string' },
+      script: { type: 'string' },
+      offline: { type: 'boolean', default: false },
+    },
+  });
+  if (values.task === undefined || values.driver === undefined) throw new Error('bench needs --task <file> and --driver <id>');
+  loadDotEnv();
+  const maxRunTokens = intFlag(values['max-run-tokens'], 'max-run-tokens') ?? intFlag(process.env.HARNESS_MAX_RUN_TOKENS, 'HARNESS_MAX_RUN_TOKENS');
+  const totalBudget = intFlag(values['total-budget'], 'total-budget') ?? intFlag(process.env.HARNESS_TOTAL_BUDGET, 'HARNESS_TOTAL_BUDGET');
+  const baselineTurns = intFlag(values['baseline-turns'], 'baseline-turns');
+  const maxTurns = intFlag(values['max-turns'], 'max-turns');
+  const { path, report } = await bench({
+    harnessRoot: HARNESS_ROOT,
+    repoRoot: HARNESS_ROOT,
+    taskPath: relative(HARNESS_ROOT, resolve(process.cwd(), values.task)),
+    driverId: values.driver,
+    offline: values.offline,
+    ...(baselineTurns === undefined ? {} : { baselineTurns }),
+    ...(values['actual-run'] === undefined ? {} : { actualRun: values['actual-run'] }),
+    ...(maxTurns === undefined ? {} : { maxTurns }),
+    ...(maxRunTokens === undefined ? {} : { maxRunTokens }),
+    ...(totalBudget === undefined ? {} : { totalBudget }),
+    ...(values.script === undefined ? {} : { script: resolve(process.cwd(), values.script) }),
+    log: (line) => io.out(line),
+  });
+  io.out(`baseline   ${report.baseline.totalInputTokens} input tokens over ${report.baseline.turns.length} turns (mean ${report.baseline.meanInputTokensPerTurn})`);
+  io.out(`actual     ${report.actual.totalInputTokens} input tokens over ${report.actual.turns.length} turns (mean ${report.actual.meanInputTokensPerTurn})`);
+  io.out(`reduction  mean/turn ${report.reductionPct.meanPerTurn}%, total ${report.reductionPct.total}%, peak ${report.reductionPct.peak}% — target >${report.targetPct}%: ${report.met ? 'MET' : 'NOT MET'}`);
+  io.out(`measured   ${report.measuredFrom}`);
+  if (report.note !== undefined) io.out(`note       ${report.note}`);
+  io.out(`report     ${relative(process.cwd(), path)}`);
+  return report.met && report.evidence ? 0 : 1;
+}
+
 const COMMANDS: Record<string, Command> = {
+  bench: (args, io) => benchCommand(args, io),
   check: (args, io) => checkCommand(args, io),
   plugins: (args, io) => pluginsCommand(args, io),
   doctor: (args, io) => doctorCommand(args, io),

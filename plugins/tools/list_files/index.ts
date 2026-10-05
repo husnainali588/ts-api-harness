@@ -6,10 +6,11 @@ const CAP = 200;
 
 export default defineTool({
   name: 'list_files',
-  description: 'List file paths in the API workspace (paths only, capped). Optional dir and glob, e.g. glob "src/**/*.ts".',
+  description: 'List file paths (capped).',
+  fetch: true,
   input: z.object({
-    dir: z.string().default('.').describe('directory relative to the API root'),
-    glob: z.string().default('**/*').describe('glob relative to dir'),
+    dir: z.string().default('.'),
+    glob: z.string().default('**/*'),
   }),
   async run(input, ctx) {
     const cwd = ctx.resolvePath(input.dir);

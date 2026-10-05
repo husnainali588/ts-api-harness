@@ -4,10 +4,10 @@ import { defineTool } from '../../../core/sdk.js';
 
 export default defineTool({
   name: 'edit_file',
-  description: 'Replace an exact string in a file. oldString must match exactly once unless replaceAll is true.',
+  description: 'Replace exact text in a file (must match once unless replaceAll).',
   writes: true,
   input: z.object({
-    path: z.string().describe('path relative to the API root'),
+    path: z.string(),
     oldString: z.string().min(1),
     newString: z.string(),
     replaceAll: z.boolean().default(false),
