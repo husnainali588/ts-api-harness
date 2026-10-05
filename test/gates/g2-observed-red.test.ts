@@ -80,7 +80,7 @@ describe('G2 blocks', () => {
   });
 
   it('edit_file on a source file is gated the same way', async () => {
-    const s = await scriptedRun(repo, [{ toolCalls: [call('edit_file', { path: 'src/app.ts', oldString: 'a', newString: 'b' })] }], { maxTurns: 1 });
+    const s = await scriptedRun(repo, [{ toolCalls: [call('edit_file', { path: 'src/routes/users.ts', oldString: 'a', newString: 'b' })] }], { maxTurns: 1 });
     expect(decisions(s.runId)).toEqual([expect.objectContaining({ decision: 'block' })]);
   });
 });

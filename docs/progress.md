@@ -233,3 +233,16 @@ Result: DONE — commits "feat(examples): three drop-in extensions and the exten
   (orm-explicit-columns 3/5 queries, no-console-in-handlers 1/2 handlers) and summary lines.
 - Tests: 22 files / 170 tests passed; typecheck clean; leak test green (now also scans examples/).
 - Core is frozen from here.
+
+## Phase 11 — red team
+
+Plan: script adversarial attempts with the scripted driver beyond CLAUDE.md §6; fix each that works with the cheapest
+mechanism (plugins, core frozen); add each as a regression test; report in docs/redteam.md.
+
+Result: DONE — commit "fix(gates): red-team fixes".
+- 15 attempts (docs/redteam.md); 8 worked before the fixes: vacuous test, weakening a red test after the source write,
+  source via src/*.test.ts, code outside src/, .js files, editing template infrastructure / template tests, computed
+  route paths, `as unknown as T`. Fixed with: rule `test-assertions`, hook `red-test-lock`, observed-red (tests under
+  test/, code under src/, .ts only), path-guard (template-owned files in greenfield), zod-boundary (computed paths),
+  no-unsafe-ts (double assertions). No core file changed.
+- Tests: 23 files / 182 tests passed; typecheck clean; leak test green; good-api, sample API, template still 100%.

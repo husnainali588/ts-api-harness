@@ -51,6 +51,12 @@ export default defineRule({
       });
 
     if (isSrcPath(ctx.rel(file))) {
+      // `x as unknown as T` (or <T><unknown>x) launders unchecked data into any type (red-team fix).
+      for (const node of [...file.getDescendantsOfKind(SyntaxKind.AsExpression), ...file.getDescendantsOfKind(SyntaxKind.TypeAssertionExpression)]) {
+        const inner = node.getExpression();
+        const viaUnknown = (Node.isAsExpression(inner) || Node.isTypeAssertion(inner)) && inner.getTypeNode()?.getKind() === SyntaxKind.UnknownKeyword;
+        if (viaUnknown) failures.push({ ...loc(node), message: `double assertion through unknown: ${node.getText().slice(0, 50)}`, fix: 'parse the value with a Zod schema instead' });
+      }
       const checker = ctx.checker.compilerObject;
       for (const node of file.getDescendants()) {
         if (!CHAIN_KINDS.has(node.getKind()) || continuesChain(node) || isDeclarationName(node)) continue;

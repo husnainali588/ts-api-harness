@@ -3,8 +3,10 @@
 import { Node, SyntaxKind } from 'ts-morph';
 import { defineRule, type RuleFailure } from '../../../core/sdk.js';
 import {
+  METHODS,
   allRoutes,
   declaredSchemas,
+  isExpressReceiver,
   firstParamName,
   getProp,
   insideParseArgs,
@@ -104,7 +106,23 @@ export default defineRule({
     for (const route of routes) failures.push(...(route.style === 'define' ? checkDefine(route) : checkExpress(route)));
 
     for (const call of file.getDescendantsOfKind(SyntaxKind.CallExpression)) {
-      if (call.getExpression().getText() === 'z.any') failures.push(fail(call, 'z.any() accepts anything', 'use a precise schema'));
+      const callee = call.getExpression();
+      if (callee.getText() === 'z.any') failures.push(fail(call, 'z.any() accepts anything', 'use a precise schema'));
+      // A route registered with a computed path is invisible to every static check (red-team fix). The template's
+      // own mountRoute is the one place allowed to do it: it mounts defineRoute routes, which are checked.
+      const [first] = call.getArguments();
+      if (
+        relPath !== 'src/http/route.ts' &&
+        Node.isPropertyAccessExpression(callee) &&
+        METHODS.includes(callee.getName() as (typeof METHODS)[number]) &&
+        call.getArguments().length >= 2 &&
+        first !== undefined &&
+        !Node.isStringLiteral(first) &&
+        !Node.isNoSubstitutionTemplateLiteral(first) &&
+        isExpressReceiver(callee.getExpression())
+      ) {
+        failures.push(fail(call, `route registered with a computed path (${first.getText().slice(0, 30)})`, 'use defineRoute or a literal path'));
+      }
     }
     const schemas = declaredSchemas(ctx.project, ctx.apiRoot).filter((s) => s.keys.length >= 2);
     const sameKeys = (a: string[], b: string[]) => a.length === b.length && a.every((k) => b.includes(k));

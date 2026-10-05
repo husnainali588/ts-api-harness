@@ -62,20 +62,18 @@ describe('G3 finish gate', () => {
     expect(lines).toMatch(/no-unsafe-ts\s+FAIL\s+src\/routes\/users\.ts:\d+/);
   });
 
-  it('rejects finish when a red test was later deleted or renamed', async () => {
+  // Deleting, renaming or skipping a red test after its source was written is now stopped at write time by
+  // red-test-lock (Phase 11); continuity below still backs it up at finish (unit tests in this file).
+  it('blocks deleting or renaming a red test once its source was written', async () => {
     const renamed = 'import { expect, it } from "vitest";\n\nit("something else", () => {\n  expect(1).toBe(1);\n});\n';
     const summary = await scriptedRun(repo, honest([...helloCycle, { toolCalls: [call('write_file', { path: 'test/hello.test.ts', content: renamed })] }]), { maxTurns: 12 });
-    expect(summary.status).not.toBe('green');
-    expect(String(finishEvent(summary.runId)?.lines)).toMatch(/test\/hello\.test\.ts › says hi: was red at turn \d+, now missing/);
+    expect(readEvents(repo, summary.runId).filter((e) => e.hook === 'red-test-lock').at(-1)).toMatchObject({ decision: 'block' });
   });
 
-  it('rejects finish when a red test was later skipped', async () => {
+  it('blocks skipping a red test once its source was written', async () => {
     const skipped = HELLO_TEST.replace('it("says hi"', 'it.skip("says hi"');
     const summary = await scriptedRun(repo, honest([...helloCycle, { toolCalls: [call('write_file', { path: 'test/hello.test.ts', content: skipped })] }]), { maxTurns: 12 });
-    expect(summary.status).not.toBe('green');
-    const lines = String(finishEvent(summary.runId)?.lines);
-    expect(lines).toMatch(/says hi: was red at turn \d+, now skipped/);
-    expect(lines).toMatch(/tests-mapped/);
+    expect(readEvents(repo, summary.runId).filter((e) => e.hook === 'red-test-lock').at(-1)).toMatchObject({ decision: 'block' });
   });
 
   it('rejects finish on the untouched scaffold (nothing of the task built)', async () => {
