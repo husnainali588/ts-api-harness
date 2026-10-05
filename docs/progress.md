@@ -337,3 +337,66 @@ RESUMED (user): (1) core/context.ts change approved and made — window verbatim
 one final attempt with Claude Sonnet 5.5 via HARNESS_CLAUDE_MODEL (pre-approved); if that fails, stop. (3) caps:
 `--total-budget 1200000`; per-run 200000 greenfield, 150000 brownfield and bench. (4) `git ls-files api-harness`
 prints nothing; it is in no commit; it will never be committed.
+
+Paid run 1c — greenfield claude (Haiku), caps 200000 / 1200000:
+| run id | driver | model (served) | transport | turns | input | output | ledger total | est. cost |
+|---|---|---|---|---|---|---|---|---|
+| 20261005101157-abd57c | claude | anthropic/claude-haiku-4.5 | gateway | 29 | 195,373 | 8,332 | 560,574 | ≈ $0.24 |
+UNPROVEN (cost cap). No placeholder writes after the core fix; it imported `uuid` again and invented `PaginatedList`.
+
+CHANGE OF PLAN (user): no more paid runs (keys removed from .env); deliver with what exists, honestly.
+- Free fixes: hook `import-guard` (blocks imports of packages not in the API's package.json; points to node:crypto
+  randomUUID), `get_standard exports` (real exported helper names). Replays of the three failed Haiku runs
+  (`20261005104317-6c530e`, `…104330-4a29b2`, `…104335-bb9486`) show placeholder-guard firing at turns 13/19/21 and
+  13/16, import-guard at turns 16/22 and 15 (the write that broke run 3).
+- Claude driver default → Claude Sonnet 5.5 (not verified live; decisions.md).
+- Free evidence: scripted greenfield `20261005104836-119e72` GREEN, shipped as PR #2 (kept open, retitled "[SCRIPTED
+  DRIVER — not a live model] …"); `harness check` on its API → 100% (problem-probe 25/25,
+  reports/check-20261005105215-10cef9); scripted brownfield `20261005104956-3ed10f` GREEN (ratchet pass, contract pass,
+  6 additive notes changes); offline bench `tokens/20261005105034-a7da99.json` (evidence: false, 80.6% mean/turn);
+  `tokens/live-runs.json` (real per-turn numbers of every live run).
+- grade.sh prints UNPROVEN for missing live evidence → 4 PASS, 3 UNPROVEN, 0 FAIL.
+- docs/design.md and README written with the honest summary.
+
+## Done
+
+**What was built, phase by phase**
+- 0b: our own task files (greenfield users, brownfield orders + notes) and a hand-written Express 5 + Zod 4 sample API.
+- 1: driver contract, plugin SDK with Zod-validated `define*`, auto-discovering registry, tolerant task loader, CLI
+  (`plugins`, `doctor`), scripted driver, `_template` folders, provider-leak test.
+- 2: loop, pre/post hook pipeline (exit 0/1/2), git worktree per run, redaction, evidence writer, file tools, G1.
+- 3: governed vitest runner, observations, ts-morph source↔test map, `run_tests`, G2 observed red.
+- 4: standards rules (zod-boundary, problem-json, tsc-strict, no-unsafe-ts, rest-conventions, tests-mapped),
+  `harness check`, greenfield template, reference good-api at 100%.
+- 5: problem-probe (our addition), G3 finish gate, task-coverage rule.
+- 6: claude (Messages) and openai (Chat Completions) drivers, native + gateway transports, spend ledger and caps.
+- 7: JIT context plugins, compaction, baseline mode, `harness bench`.
+- 8: brownfield: green baseline, contract/findings snapshots, `propose_scope` + scope-guard, ratchet, contract gate.
+- 9: ship step (G4) with a real PR proven end to end.
+- 10: three drop-in extensions, extension demo, extensibility test, docs/extending.md; core frozen.
+- 11: red team — 15 attempts, 8 fixed with plugins (docs/redteam.md).
+- 12: live smoke tests, three failed Haiku greenfield runs + fixes, free scripted evidence, grade.sh, design note.
+
+**Key numbers (from harness-written files)**
+- Standards: scripted greenfield API 100% (9 rules, problem-probe 25/25) — reports/check-20261005105215-10cef9; good-api,
+  sample API and template 100% (tests).
+- Tokens: offline estimate 80.6% mean per-turn reduction over turns 1–8 (evidence: false; target >90% not met); live
+  actual-mode means 2,947–6,737 input tokens per turn (tokens/live-runs.json). No evidence-grade reduction exists.
+- Live spend: 560,574 input + 27,708 output tokens over five paid runs ≈ $0.70 (ledger `.harness/spend.json`).
+- Tests: 25 files / 191 tests; grade.sh 4 PASS, 3 UNPROVEN, 0 FAIL.
+
+**Pull requests**
+- https://github.com/husnainali588/ts-api-harness/pull/2 — open, scripted driver, labelled as such.
+- https://github.com/husnainali588/ts-api-harness/pull/1 — Phase 9 proof, closed.
+
+**UNPROVEN / BLOCKED**
+- No live run finished green on either driver; Claude greenfield failed three times (Haiku 4.5, cost caps).
+- Not run (budget): OpenAI greenfield, brownfield live run, live token bench; the Sonnet 5.5 default is unverified;
+  the openai driver ran only via the gateway (native covered by recorded fixtures).
+- Token target >90% not met offline; core is 3,361 lines (target < 1,500); one approved core change after the freeze.
+
+**Open lines in docs/QUESTIONS.md**
+- Confirm `.env.example` has empty values (I could not read it).
+- Token target: accept the lower number or spend effort elsewhere.
+- (Resolved: BUILD_PROMPTS restore, progress.md wipe, Phase 6 key block.)
+- The submission tag was not created (left to you). `api-harness/` (empty, untracked) left untouched.
