@@ -52,7 +52,7 @@ describe('G2 blocks', () => {
       ],
       { maxTurns: 3 },
     );
-    expect(readEvents(repo, s.runId).find((e) => e.type === 'tool' && e.tool === 'run_tests')?.summary).toMatch(/^PASS 1 \/ FAIL 0/);
+    expect(readEvents(repo, s.runId).find((e) => e.type === 'tool' && e.tool === 'run_tests')?.summary).toMatch(/^PASS \d+ \/ FAIL 0/);
     expect(decisions(s.runId).at(-1)).toMatchObject({ decision: 'block' });
   });
 
@@ -98,13 +98,13 @@ describe('G2 allows an honest TDD cycle', () => {
       { maxTurns: 4 },
     );
     const tools = readEvents(repo, s.runId).filter((e) => e.type === 'tool' && e.tool === 'run_tests');
-    expect(tools[0]?.summary).toMatch(/^PASS 0 \/ FAIL 1 — test\/hello\.test\.ts › \(file failed to load\): Cannot find module/);
-    expect(tools[1]?.summary).toMatch(/^PASS 1 \/ FAIL 0 — all green/);
+    expect(tools[0]?.summary).toMatch(/^PASS \d+ \/ FAIL 1 — test\/hello\.test\.ts › \(file failed to load\): Cannot find module/);
+    expect(tools[1]?.summary).toMatch(/^PASS \d+ \/ FAIL 0 — all green/);
     expect(decisions(s.runId)).toEqual([expect.objectContaining({ decision: 'record', exit: 1 })]);
     expect(readFileSync(apiFile(s.worktree, 'src/hello.ts'), 'utf8')).toBe(SOURCE);
     const observations = JSON.parse(readFileSync(join(repo, '.harness', 'runs', s.runId, 'observations.json'), 'utf8'));
     expect(observations.red).toEqual([expect.objectContaining({ file: 'test/hello.test.ts', name: LOAD_CASE, kind: 'load-error' })]);
-    expect(observations.latest).toEqual([expect.objectContaining({ file: 'test/hello.test.ts', name: 'says hi', status: 'passed' })]);
+    expect(observations.latest).toEqual(expect.arrayContaining([expect.objectContaining({ file: 'test/hello.test.ts', name: 'says hi', status: 'passed' })]));
   });
 
   it('maps through an import even when the test name does not follow the convention', async () => {

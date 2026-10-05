@@ -141,6 +141,10 @@ export interface RuleContext {
   readonly checker: TypeChecker;
   readonly exec: Exec;
   readonly task?: Task;
+  /** API-root-relative path of a ts-morph source file. */
+  rel(file: SourceFile): string;
+  /** Test files mapped to a source file (imports + naming convention), as G2 sees them. */
+  mappedTests(source: string): string[];
   saveRaw(label: string, content: string): string;
 }
 
@@ -151,6 +155,8 @@ export interface RuleDefinition {
   readonly unit: string;
   readonly files: readonly string[];
   readonly required: boolean;
+  /** 'ratio' prints "12/12 handlers"; 'count' prints the number of failures, e.g. "0 errors". Default 'ratio'. */
+  readonly summary?: 'ratio' | 'count';
   check?(file: SourceFile, ctx: RuleContext): FileResult | Promise<FileResult>;
   checkProject?(ctx: RuleContext): ProjectResult | Promise<ProjectResult>;
 }
@@ -228,6 +234,7 @@ const DefinitionSchemas = {
       unit: z.string().min(1),
       files: z.array(z.string().min(1)).min(1),
       required: z.boolean(),
+      summary: z.enum(['ratio', 'count']).optional(),
       check: fn.optional(),
       checkProject: fn.optional(),
     })

@@ -3,6 +3,7 @@
 import { randomBytes } from 'node:crypto';
 import { join, resolve } from 'node:path';
 import { z } from 'zod';
+import { compactReport, runChecks } from './checks.js';
 import { Context } from './context.js';
 import type { ToolCall, ToolResult, ToolSpec, TurnResponse } from './driver.js';
 import { execTool } from './exec.js';
@@ -96,7 +97,19 @@ const defaultServices = (run: RunContext): HarnessServices => ({
       turn: run.turn,
       saveRaw: (label, content) => run.evidence.saveRaw(label, content),
     }),
-  runChecks: () => notAvailable('run_checks'),
+  runChecks: async () => {
+    const report = await runChecks({
+      apiRoot: run.workspace.apiRoot,
+      registry: run.registry,
+      runId: run.runId,
+      reportsRoot: run.repoRoot,
+      task: run.task,
+      saveRaw: (label, content) => run.evidence.saveRaw(label, content),
+    });
+    const summary = compactReport(report);
+    run.state.lastCheck = `verdict ${report.verdictPct}%${report.green ? '' : ` — failing: ${report.rules.filter((r) => r.required && (r.status === 'fail' || r.status === 'unproven')).map((r) => r.id).join(', ')}`}`;
+    return { summary, raw: report.text };
+  },
   proposeScope: () => notAvailable('propose_scope'),
 });
 

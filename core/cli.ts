@@ -4,8 +4,10 @@ import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 import { exec } from './exec.js';
-import { runHarness } from './loop.js';
+import { runChecks } from './checks.js';
+import { newRunId, runHarness } from './loop.js';
 import { loadRegistry, type Registry } from './registry.js';
+import { loadTask } from './task.js';
 
 export const HARNESS_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -13,7 +15,7 @@ const USAGE = `usage: harness <command> [options]
 
   run     --task <file> --driver <id> [--baseline] [--ship] [--max-turns N] [--max-run-tokens N] [--total-budget N] [--script <file>]
   bench   --task <file> --driver <id> [--baseline-turns N] [--actual-run <runId>] [--max-run-tokens N] [--total-budget N]
-  check   --api <path>
+  check   --api <path> [--task <file>]
   ship    --run <runId>
   plugins                 list discovered drivers, tools, hooks, rules and context fetchers
   doctor                  environment check (prints env variable names, never values)`;
@@ -146,7 +148,25 @@ export async function runCommand(args: string[], io: Io): Promise<number> {
   return summary.status === 'green' ? 0 : 1;
 }
 
+export async function checkCommand(args: string[], io: Io): Promise<number> {
+  const { values } = parseArgs({ args, strict: true, options: { api: { type: 'string' }, task: { type: 'string' } } });
+  if (values.api === undefined) throw new Error('check needs --api <path>');
+  const registry = await loadRegistry(HARNESS_ROOT);
+  const task = values.task === undefined ? undefined : loadTask(values.task, process.cwd());
+  const report = await runChecks({
+    apiRoot: resolve(process.cwd(), values.api),
+    registry,
+    runId: `check-${newRunId()}`,
+    reportsRoot: HARNESS_ROOT,
+    ...(task === undefined ? {} : { task }),
+  });
+  io.out(report.text);
+  io.out(`report     ${relative(process.cwd(), join(report.reportDir, 'standards.txt'))}`);
+  return report.green ? 0 : 1;
+}
+
 const COMMANDS: Record<string, Command> = {
+  check: (args, io) => checkCommand(args, io),
   plugins: (args, io) => pluginsCommand(args, io),
   doctor: (args, io) => doctorCommand(args, io),
   run: (args, io) => runCommand(args, io),

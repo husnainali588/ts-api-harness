@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process';
-import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { Io } from '../core/cli.js';
@@ -87,6 +87,31 @@ export function scriptedRun(repo: string, turns: ScriptLine[], opts: Partial<Run
 }
 
 export const greenGate = async () => ({ green: true, lines: ['test gate: green'], unproven: [] });
+
+/** A temp copy of an API fixture with node_modules linked to the template's install. */
+export function apiCopy(source: string, prefix = 'api'): string {
+  const dir = tempDir(prefix);
+  cpSync(join(REPO_ROOT, source), dir, { recursive: true, filter: (src) => !src.split('/').includes('node_modules') });
+  symlinkSync(join(REPO_ROOT, 'templates', 'api', 'node_modules'), join(dir, 'node_modules'), 'dir');
+  return dir;
+}
+
+/** Replaces `from` with `to` in a file (must match) and returns the 1-based line where `to` starts. */
+export function mutate(root: string, rel: string, from: string, to: string): number {
+  const path = join(root, rel);
+  const text = readFileSync(path, 'utf8');
+  const index = text.indexOf(from);
+  if (index < 0) throw new Error(`mutate: "${from.slice(0, 40)}" not found in ${rel}`);
+  writeFileSync(path, text.slice(0, index) + to + text.slice(index + from.length));
+  return text.slice(0, index).split('\n').length;
+}
+
+export function appendTo(root: string, rel: string, text: string): number {
+  const path = join(root, rel);
+  const before = readFileSync(path, 'utf8');
+  writeFileSync(path, `${before}${text}`);
+  return before.split('\n').length;
+}
 
 export function readEvents(repo: string, runId: string): Record<string, unknown>[] {
   return readFileSync(join(repo, 'runs', runId, 'events.jsonl'), 'utf8')

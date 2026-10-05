@@ -89,3 +89,29 @@ Plan:
 Result: DONE — commit "feat(core): test runner, observations, observed-red gate (G2)".
 - Tests: 12 files / 102 tests passed; typecheck clean; leak test green.
 - Done-when: all G2 bypass tests blocked; scripted honest cycle test → red → source → green passes.
+- Commit `defa674`, pushed.
+
+## Phase 4 — standards rules, `harness check`, greenfield template
+
+Plan:
+1. `templates/api`: Express 5 + Zod 4 scaffold — `createApp()` exposing `routeTable`; `defineRoute({ method, path, params,
+   query, body, responses, handler })` parsing every input and validating the reply against `responses[status]`;
+   problem() + Problem schema; 404 catch-all, malformed JSON → 400, validation → 422, NotFound/Conflict, unknown → 500
+   without stack; cursor codec + page schema; idempotency middleware; in-memory store; tests for every file.
+   `src/routes/index.ts` is harness-generated from `src/routes/*.ts` (post-hook `route-index`; model writes blocked).
+2. `core/checks.ts`: rule runner with the type checker, `npm ci --ignore-scripts` when node_modules is missing
+   (failure → unproven), one line per rule per file, summary block, verdict, exit code, reports/<id>/standards.{txt,json};
+   `harness check --api <path> [--task <file>]`; tool `run_checks`.
+3. Rule plugins: zod-boundary, problem-json, tsc-strict, no-unsafe-ts, rest-conventions, tests-mapped — understanding
+   both template `defineRoute` routes and hand-written Express routers (shared helpers in `plugins/rules/_shared`).
+4. `test/fixtures/good-api`: hand-made users API on the template → 100%. Sample API also 100% (non-template code).
+5. Tests: per rule, a mutation of good-api that must FAIL at the right file:line, and the good one passing; the scaffolded
+   template prints only pass/n/a and 100%.
+
+Result: DONE — commit "feat: standards rules, harness check, greenfield template".
+- Built: core/checks.ts, `harness check`, tool run_checks, hook route-index, 6 rule plugins + `_shared` analysis,
+  templates/api (7 source files, 7 test files, 34 tests), test/fixtures/good-api (users, 44 tests).
+- Tests: 14 files / 118 tests passed; typecheck clean; leak test green.
+- Done-when: `npx harness check --api test/fixtures/good-api` → verdict 100%, exit 0; every rule's bad mutation fails with
+  file:line (test/rules.test.ts); template → only pass/n/a, 100%; sample API (hand-written Express) → 100%.
+- Scripted greenfield run on the real template reaches run_checks 100% through G1/G2 (test/greenfield.test.ts).
