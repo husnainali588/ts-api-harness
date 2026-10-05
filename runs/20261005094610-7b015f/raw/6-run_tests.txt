@@ -1,0 +1,74 @@
+test/routes/users.test.ts › Users API POST /users should create a user with email and name
+AssertionError: expected 404 to be 201 // Object.is equality
+
+test/routes/users.test.ts › Users API POST /users should reject invalid email
+AssertionError: expected 404 to be 422 // Object.is equality
+
+test/routes/users.test.ts › Users API POST /users should reject name with length 0
+AssertionError: expected 404 to be 422 // Object.is equality
+
+test/routes/users.test.ts › Users API POST /users should reject name with length > 100
+AssertionError: expected 404 to be 422 // Object.is equality
+
+test/routes/users.test.ts › Users API POST /users should reject duplicate email
+AssertionError: expected 404 to be 409 // Object.is equality
+
+test/routes/users.test.ts › Users API POST /users should reject missing email
+AssertionError: expected 404 to be 422 // Object.is equality
+
+test/routes/users.test.ts › Users API POST /users should reject missing name
+AssertionError: expected 404 to be 422 // Object.is equality
+
+test/routes/users.test.ts › Users API GET /users/:id should get a user by id
+AssertionError: expected 404 to be 200 // Object.is equality
+
+test/routes/users.test.ts › Users API GET /users/:id should reject invalid uuid
+AssertionError: expected 404 to be 422 // Object.is equality
+
+test/routes/users.test.ts › Users API GET /users should list users with default limit
+AssertionError: expected 404 to be 200 // Object.is equality
+
+test/routes/users.test.ts › Users API GET /users should list users with custom limit
+AssertionError: expected 404 to be 200 // Object.is equality
+
+test/routes/users.test.ts › Users API GET /users should reject limit > 100
+AssertionError: expected 404 to be 422 // Object.is equality
+
+test/routes/users.test.ts › Users API GET /users should use cursor pagination
+AssertionError: Target cannot be null or undefined.
+
+test/routes/users.test.ts › Users API GET /users should reject invalid cursor
+AssertionError: expected 404 to be 422 // Object.is equality
+
+test/routes/users.test.ts › Users API PATCH /users/:id should update user email
+AssertionError: expected 404 to be 200 // Object.is equality
+
+test/routes/users.test.ts › Users API PATCH /users/:id should update user name
+AssertionError: expected 404 to be 200 // Object.is equality
+
+test/routes/users.test.ts › Users API PATCH /users/:id should update both email and name
+AssertionError: expected 404 to be 200 // Object.is equality
+
+test/routes/users.test.ts › Users API PATCH /users/:id should reject invalid email in patch
+AssertionError: expected 404 to be 422 // Object.is equality
+
+test/routes/users.test.ts › Users API PATCH /users/:id should reject invalid name in patch
+AssertionError: expected 404 to be 422 // Object.is equality
+
+test/routes/users.test.ts › Users API PATCH /users/:id should reject duplicate email in patch
+AssertionError: expected 404 to be 409 // Object.is equality
+
+test/routes/users.test.ts › Users API PATCH /users/:id should reject invalid uuid in patch
+AssertionError: expected 404 to be 422 // Object.is equality
+
+test/routes/users.test.ts › Users API DELETE /users/:id should delete a user
+AssertionError: expected 404 to be 204 // Object.is equality
+
+test/routes/users.test.ts › Users API DELETE /users/:id should reject invalid uuid in delete
+AssertionError: expected 404 to be 422 // Object.is equality
+
+test/schemas/user.test.ts › (file failed to load)
+Cannot find package 'uuid' imported from /Users/husnainali/Claude Code/AGENT HARNESS/.harness/worktrees/20261005094610-7b015f/generated/users-api/src/schemas/us
+
+--- vitest stderr ---
+Command failed: /opt/homebrew/Cellar/node/26.10.0_1/bin/node /Users/husnainali/Claude Code/AGENT HARNESS/.harness/worktrees/20261005094610-7b015f/generated/users-api/node_modules/vitest/vitest.mjs run --reporter=json --outputFile=/Users/husnainali/Claude Code/AGENT HARNESS/.harness/runs/20261005094610-7b015f/vitest-18-1791193628955.json --passWithNoTests

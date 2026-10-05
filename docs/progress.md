@@ -272,3 +272,31 @@ Plan:
    After each: run id, model, tokens, ledger, cost here. Failure → diagnose by replay, fix, STOP and ask before re-run.
 2. Commit evidence (runs/, reports/, tokens/ of those runs; the generated API to generated/users-api).
 3. scripts/grade.sh offline must pass; docs/design.md with numbers copied from harness-written files; README evidence.
+
+Paid run 1 — greenfield `--driver claude --ship`:
+| run id | driver | model (served) | transport | turns | input | output | ledger total | est. cost |
+|---|---|---|---|---|---|---|---|---|
+| 20261005094610-7b015f | claude | anthropic/claude-haiku-4.5 | gateway | 27 | 147,536 | 8,459 | 165,273 | ≈ $0.19 ($1/$5 per M) |
+Result: UNPROVEN — `stopped by cost cap (147536 spent + ~5193 next turn > 150000 input tokens)`; not shipped.
+Diagnosis (replay `20261005095226-8a4a7a`, free):
+- Turns 13–22: the model wrote history placeholders as file content (`src/schemas/user.ts` = "[704 chars elided from
+  history]", `src/routes/users.ts` = "[9387 chars elided …]") — it copied the compaction marker from its own earlier
+  write calls. ~8 turns (~45k tokens) lost.
+- Turn 26: it imported the `uuid` package (not installed) → app failed to load.
+- Turns 1–6 were reads (as designed), turn 9 red (404) as expected for TDD.
+Fixes (plugins only, core untouched), commit "fix(hooks): placeholder-guard":
+- hook `placeholder-guard` blocks writes containing history placeholders, with a fix line; replay of the paid
+  transcript now blocks all three placeholder writes (turns 13, 19, 21).
+- template doc: installed packages listed; ids via `node:crypto` randomUUID.
+- Tests: 24 files / 186 tests passed; typecheck clean; leak test green.
+
+STOPPED: paid run 1 (greenfield claude) hit its cost cap and needs a re-run (AUTORUN §6). Needed from you:
+1. Approval to re-run `npx harness run --task tasks/users.yaml --driver claude --ship --max-run-tokens 150000
+   --total-budget 650000` — estimated ≤ $0.20 (cap 150k input at $1/M + ~10k output at $5/M).
+2. A budget decision: 484,727 tokens remain of 650,000. The remaining plan at full caps is claude re-run (≤150k) +
+   openai greenfield (≤150k) + brownfield (≤150k) + bench with 8 baseline turns (~8 × 15–18k ≈ 130k) ≈ 580k, so the
+   current total budget may not cover everything if runs go long. Options: raise `--total-budget` (e.g. 800,000,
+   ≈ +$0.15 worst case) and/or `--max-run-tokens` to 200,000 for greenfield (27 turns used 148k; a green run likely
+   needs 20–30 turns); or keep the caps and accept that a later run may be refused for budget.
+3. Optional: OPENAI_API_KEY is not visible to the harness (doctor shows only OPENROUTER_API_KEY for the openai driver);
+   the openai evidence will say transport "gateway" unless that is fixed.
