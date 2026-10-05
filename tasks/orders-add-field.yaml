@@ -1,0 +1,9 @@
+# Brownfield task: a scoped change to an existing API. `api` points at the existing API's root.
+resource: orders
+api: fixtures/sample-api
+fields:
+  notes: { type: string, required: false, maxLength: 500 }
+behaviours:
+  - Accept an optional notes field when creating or partially updating an order.
+  - Return notes on order responses when it is set; leave it out when it is not.
+  - Requests and responses without notes keep working exactly as before (no breaking change).

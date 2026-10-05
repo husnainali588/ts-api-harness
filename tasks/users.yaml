@@ -1,0 +1,13 @@
+# Greenfield task: build a new REST API for one resource.
+resource: users
+fields:
+  id:        { type: uuid, generated: true }
+  email:     { type: email, required: true, unique: true }
+  name:      { type: string, required: true, minLength: 1, maxLength: 100 }
+  createdAt: { type: datetime, generated: true }
+behaviours:
+  - Create a user. A duplicate email is a conflict.
+  - Get one user by id. An unknown id is not found.
+  - List users with cursor pagination (limit defaults to 20, maximum 100).
+  - Partially update a user's email or name. A duplicate email is a conflict; an unknown id is not found.
+  - Delete a user by id. An unknown id is not found.
