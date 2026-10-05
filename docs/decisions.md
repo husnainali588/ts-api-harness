@@ -13,4 +13,11 @@
 - `Idempotency-Key` on POST is optional but honoured: same key + same body replays status, `Location` and body; same key + different body → 409.
 - Cursors encode a monotonic sequence number, not an offset, so pages stay stable across deletes; `page`/`offset` query params are rejected (strict query schema).
 - TypeScript pinned to 5.x (`~5.9.3`) although 7.x is npm `latest`: CLAUDE.md §2 says 5.x and ts-morph needs the 5.x compiler API.
+- Each `TurnResponse` also carries `transport` (`native | gateway | local`) and the serving `model` id; `local` = scripted/replayed turns, never evidence.
+- Code under `core/`, `plugins/`, `tasks/`, `templates/` cites the design doc as "spec §x", never by file name: the leak test is case-insensitive and the doc's file name contains a provider word.
+- Plugin definitions are validated structurally (duck-typed Zod checks), not with `instanceof`, so a plugin loaded from any path or a temp copy validates the same way.
+- Drivers declare `envKeys` (any one authenticates) and `envVars` (optional settings) so `harness doctor` can print variable names without core naming any provider.
+- Subprocesses get a scrubbed env (names ending `_KEY`, `_TOKEN`, `_SECRET`, `_PASSWORD`, `_CREDENTIALS` or containing `API_KEY` removed), so model-written tests run by the harness cannot read keys; only harness-owned ship steps keep them.
+- `.env` is loaded by the CLI with `process.loadEnvFile`; tests set `HARNESS_NO_DOTENV=1` so they never touch real keys.
+- `npx harness` resolves the package's own `bin` (verified with npm 11), so no global link is needed.
 - Wrong method on an existing path → 404 problem (Express has no automatic 405); the probe's allowed set for "wrong method" is {404, 405}.
