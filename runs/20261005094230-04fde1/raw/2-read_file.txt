@@ -1,0 +1,115 @@
+src/http/route.ts lines 1-114 of 114
+   1| import type { Express, Request, RequestHandler, Response } from 'express';
+   2| import { z } from 'zod';
+   3| import { parseInput } from './problem.js';
+   4| 
+   5| // defineRoute: the only way routes are declared. Every input is parsed with its schema before the handler runs,
+   6| // and every reply is validated against responses[status] before it is sent.
+   7| 
+   8| export type Method = 'get' | 'post' | 'put' | 'patch' | 'delete';
+   9| 
+  10| export type ResponseMap = { [status: number]: z.ZodType };
+  11| 
+  12| /** No-content response schema, e.g. `responses: { 204: NoContent }`. */
+  13| export const NoContent = z.undefined();
+  14| 
+  15| /**
+  16|  * What a handler returns: a status that has a schema in `responses`, its body, and an optional Location.
+  17|  * The body is validated against responses[status] before sending; a mismatch is a 500.
+  18|  */
+  19| export interface Reply {
+  20|   status: number;
+  21|   body?: unknown;
+  22|   location?: string;
+  23| }
+  24| 
+  25| export interface RouteInput<P, Q, B> {
+  26|   params: P;
+  27|   query: Q;
+  28|   body: B;
+  29| }
+  30| 
+  31| export interface RouteDef<
+  32|   P extends z.ZodType = z.ZodType,
+  33|   Q extends z.ZodType = z.ZodType,
+  34|   B extends z.ZodType = z.ZodType,
+  35|   R extends ResponseMap = ResponseMap,
+  36| > {
+  37|   method: Method;
+  38|   /** Full path, e.g. '/v1/users/:id'. */
+  39|   path: string;
+  40|   params?: P;
+  41|   query?: Q;
+  42|   body?: B;
+  43|   responses: R;
+  44|   handler(input: RouteInput<z.output<P>, z.output<Q>, z.output<B>>): Reply | Promise<Reply>;
+  45| }
+  46| 
+  47| /** Any route made with defineRoute (what the route table holds). */
+  48| export interface AnyRoute {
+  49|   method: Method;
+  50|   path: string;
+  51|   params?: z.ZodType;
+  52|   query?: z.ZodType;
+  53|   body?: z.ZodType;
+  54|   responses: ResponseMap;
+  55|   handler(input: RouteInput<unknown, unknown, unknown>): Reply | Promise<Reply>;
+  56| }
+  57| 
+  58| export function defineRoute<
+  59|   P extends z.ZodType = z.ZodUndefined,
+  60|   Q extends z.ZodType = z.ZodUndefined,
+  61|   B extends z.ZodType = z.ZodUndefined,
+  62|   R extends ResponseMap = ResponseMap,
+  63| >(def: RouteDef<P, Q, B, R>): RouteDef<P, Q, B, R> {
+  64|   return def;
+  65| }
+  66| 
+  67| /** A reply that does not match its response schema is a server bug: 500, details stay in the server. */
+  68| export class ResponseContractError extends Error {
+  69|   constructor(message: string) {
+  70|     super(message);
+  71|     this.name = 'ResponseContractError';
+  72|   }
+  73| }
+  74| 
+  75| function handlerFor(route: AnyRoute): RequestHandler {
+  76|   return async (req: Request, res: Response) => {
+  77|     const params = route.params === undefined ? undefined : parseInput(route.params, req.params, 'params');
+  78|     const query = route.query === undefined ? undefined : parseInput(route.query, req.query, 'query');
+  79|     const body = route.body === undefined ? undefined : parseInput(route.body, req.body, 'body');
+  80|     const reply = await route.handler({ params, query, body });
+  81|     const schema = route.responses[reply.status];
+  82|     if (schema === undefined) throw new ResponseContractError(`${route.method} ${route.path}: no response schema for ${reply.status}`);
+  83|     const checked = schema.safeParse(reply.body);
+  84|     if (!checked.success) throw new ResponseContractError(`${route.method} ${route.path}: reply does not match responses[${reply.status}]`);
+  85|     if (reply.location !== undefined) res.location(reply.location);
+  86|     if (checked.data === undefined) {
+  87|       res.status(reply.status).end();
+  88|       return;
+  89|     }
+  90|     res.status(reply.status).json(checked.data);
+  91|   };
+  92| }
+  93| 
+  94| export function mountRoute(app: Express, route: AnyRoute): void {
+  95|   const handler = handlerFor(route);
+  96|   switch (route.method) {
+  97|     case 'get':
+  98|       app.get(route.path, handler);
+  99|       break;
+ 100|     case 'post':
+ 101|       app.post(route.path, handler);
+ 102|       break;
+ 103|     case 'put':
+ 104|       app.put(route.path, handler);
+ 105|       break;
+ 106|     case 'patch':
+ 107|       app.patch(route.path, handler);
+ 108|       break;
+ 109|     case 'delete':
+ 110|       app.delete(route.path, handler);
+ 111|       break;
+ 112|   }
+ 113| }
+ 114| 

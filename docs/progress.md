@@ -179,6 +179,8 @@ Result: PARTLY DONE — offline part commit `0bef81f`, blocked-key note `150480b
   template files. Fix (plugin, core untouched): read_file without a range on files > 60 lines returns an outline
   (top-level declarations + line numbers) and asks for a range; raw full text still goes to disk / to the baseline.
   Offline bench on that real transcript: 74% mean per turn over turns 1–6 (was ~65% at turn 6 before the outline).
+  Run ids (scripted, offline): rehearsal replay `20261005094139-316ec7`, replay with outlines `20261005094230-04fde1`,
+  bench actual `20261005094243-c48fd3` / baseline `20261005094244-3b8f66`.
 
 ## Phase 7 — JIT context, compaction, baseline, token report
 

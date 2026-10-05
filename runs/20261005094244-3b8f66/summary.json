@@ -1,0 +1,59 @@
+{
+  "runId": "20261005094244-3b8f66",
+  "status": "unproven",
+  "reason": "turn budget exhausted (6 turns)",
+  "task": {
+    "path": "tasks/users.yaml",
+    "sha256": "5073335c5df28f36e69ca84db156b14887717b9f5d79add14db59148ae5a0c38",
+    "mode": "greenfield"
+  },
+  "fingerprint": {
+    "sha256": "745386210af57545943d4ec0adf968fc88c373bbbd111f296c2a95221ec5c844",
+    "files": 19
+  },
+  "driver": "scripted",
+  "baseline": true,
+  "transports": [
+    "local"
+  ],
+  "servedBy": [
+    "scripted"
+  ],
+  "turns": 6,
+  "tokens": {
+    "turns": 6,
+    "totalInputTokens": 86205,
+    "totalOutputTokens": 494,
+    "meanInputTokensPerTurn": 14368,
+    "peakInputTokens": 17114,
+    "source": "estimate"
+  },
+  "branch": "harness/users-scripted-3b8f66",
+  "worktree": ".harness/worktrees/20261005094244-3b8f66",
+  "apiRoot": "generated/users-api",
+  "gate": null,
+  "cost": {
+    "paid": false,
+    "requestedModel": null,
+    "cap": null,
+    "spentBefore": 17737,
+    "spentAfter": 17737
+  },
+  "writtenFiles": [],
+  "contractChanges": null,
+  "prUrl": null,
+  "honesty": {
+    "proven": [],
+    "unproven": [
+      "run: turn budget exhausted (6 turns)",
+      "token numbers are estimates (scripted/replayed driver), not evidence"
+    ],
+    "outOfReach": [
+      "business-logic correctness beyond the tests",
+      "test quality beyond red→green",
+      "security",
+      "performance",
+      "persistence semantics"
+    ]
+  }
+}

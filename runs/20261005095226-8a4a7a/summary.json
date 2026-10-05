@@ -1,0 +1,65 @@
+{
+  "runId": "20261005095226-8a4a7a",
+  "status": "unproven",
+  "reason": "turn budget exhausted (27 turns)",
+  "task": {
+    "path": "tasks/users.yaml",
+    "sha256": "5073335c5df28f36e69ca84db156b14887717b9f5d79add14db59148ae5a0c38",
+    "mode": "greenfield"
+  },
+  "fingerprint": {
+    "sha256": "227e8871f77cd21564397764ab0a395677225af97f90cc2aac1f356ed2a4dbe0",
+    "files": 20
+  },
+  "driver": "scripted",
+  "baseline": false,
+  "transports": [
+    "local"
+  ],
+  "servedBy": [
+    "scripted"
+  ],
+  "turns": 27,
+  "tokens": {
+    "turns": 27,
+    "totalInputTokens": 110722,
+    "totalOutputTokens": 6416,
+    "meanInputTokensPerTurn": 4101,
+    "peakInputTokens": 6469,
+    "source": "estimate"
+  },
+  "branch": "harness/users-scripted-8a4a7a",
+  "worktree": ".harness/worktrees/20261005095226-8a4a7a",
+  "apiRoot": "generated/users-api",
+  "gate": null,
+  "cost": {
+    "paid": false,
+    "requestedModel": null,
+    "cap": null,
+    "spentBefore": 165273,
+    "spentAfter": 165273
+  },
+  "writtenFiles": [
+    "test/routes/users.test.ts",
+    "test/schemas/user.test.ts",
+    "src/schemas/user.ts",
+    "package.json",
+    "src/routes/users.ts"
+  ],
+  "contractChanges": null,
+  "prUrl": null,
+  "honesty": {
+    "proven": [],
+    "unproven": [
+      "run: turn budget exhausted (27 turns)",
+      "token numbers are estimates (scripted/replayed driver), not evidence"
+    ],
+    "outOfReach": [
+      "business-logic correctness beyond the tests",
+      "test quality beyond red→green",
+      "security",
+      "performance",
+      "persistence semantics"
+    ]
+  }
+}
