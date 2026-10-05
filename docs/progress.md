@@ -331,3 +331,9 @@ Needed from you:
    MODEL_UPGRADE is "ask"), or keep Haiku.
 3. Budget check: 434,799 left; remaining plan = claude greenfield (≤200k) + openai greenfield (≤200k) + brownfield
    (≤150k) + bench (≤150k) = ≤700k at caps → the 800k total no longer covers every run at its cap.
+
+RESUMED (user): (1) core/context.ts change approved and made — window verbatim, older large inputs dropped with an
+`_elided` note; test added; recorded in decisions.md; 24 files / 187 tests green. (2) re-run with Haiku; if it fails,
+one final attempt with Claude Sonnet 5.5 via HARNESS_CLAUDE_MODEL (pre-approved); if that fails, stop. (3) caps:
+`--total-budget 1200000`; per-run 200000 greenfield, 150000 brownfield and bench. (4) `git ls-files api-harness`
+prints nothing; it is in no commit; it will never be committed.

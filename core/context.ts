@@ -25,12 +25,22 @@ export interface ContextOptions {
 
 const ELIDE_OVER = 200;
 
-/** Long strings inside old tool-call inputs (e.g. written file content) become a short marker. */
+/**
+ * Old tool-call inputs: large string fields (e.g. written file content) are dropped and replaced by one
+ * `_elided: "<N> chars, already applied"` note. No placeholder text is left where content was, because a live model
+ * copied such placeholders into new files (docs/decisions.md).
+ */
 export function elideInput(value: unknown): unknown {
-  if (typeof value === 'string') return value.length > ELIDE_OVER ? `[${value.length} chars elided from history]` : value;
   if (Array.isArray(value)) return value.map(elideInput);
-  if (typeof value === 'object' && value !== null) return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, elideInput(v)]));
-  return value;
+  if (typeof value !== 'object' || value === null) return value;
+  const out: Record<string, unknown> = {};
+  let dropped = 0;
+  for (const [k, v] of Object.entries(value)) {
+    if (typeof v === 'string' && v.length > ELIDE_OVER) dropped += v.length;
+    else out[k] = elideInput(v);
+  }
+  if (dropped > 0) out._elided = `${dropped} chars, already applied`;
+  return out;
 }
 
 export class Context {
@@ -104,13 +114,12 @@ export class Context {
         }
       }
     }
-    let lastAssistant = -1;
-    for (let i = this.history.length - 1; i >= 0 && lastAssistant < 0; i -= 1) if (this.history[i]?.role === 'assistant') lastAssistant = i;
     const compacted = this.history.map((msg, i): Message => {
-      // Large tool-call inputs (e.g. file content the model wrote) are elided from every exchange but the latest:
-      // the result already says what was written, and read_file brings it back if needed.
-      if (msg.role === 'assistant') return i === lastAssistant ? msg : { ...msg, toolCalls: msg.toolCalls.map((c) => ({ ...c, input: elideInput(c.input) })) };
-      if (i >= cutoff || msg.role !== 'tool') return msg;
+      // The last `keep` exchanges stay verbatim. Older ones: large tool-call inputs are dropped (see elideInput) and
+      // tool results become one-line stubs.
+      if (i >= cutoff) return msg;
+      if (msg.role === 'assistant') return { ...msg, toolCalls: msg.toolCalls.map((c) => ({ ...c, input: elideInput(c.input) })) };
+      if (msg.role !== 'tool') return msg;
       return {
         role: 'tool',
         results: msg.results.map((r) => ({ ...r, content: this.stubs.get(r.callId) ?? `[${r.content.slice(0, 60)}… — dropped, re-run if needed]` })),
