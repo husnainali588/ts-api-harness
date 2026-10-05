@@ -7,6 +7,7 @@ import { compactReport, runChecks } from './checks.js';
 import { Context } from './context.js';
 import type { ToolCall, ToolResult, ToolSpec, TurnResponse } from './driver.js';
 import { execTool } from './exec.js';
+import { finishGate } from './finish.js';
 import { blockMessage, runHooks } from './hooks.js';
 import { findDriver, loadRegistry, type Registry } from './registry.js';
 import type { HarnessServices, HookContext, ToolContext, ToolDefinition, ToolOutput } from './sdk.js';
@@ -113,7 +114,7 @@ const defaultServices = (run: RunContext): HarnessServices => ({
   proposeScope: () => notAvailable('propose_scope'),
 });
 
-const defaultGate = async (): Promise<GateResult> => ({ green: false, lines: ['finish gate not configured'], unproven: ['finish gate'] });
+const defaultGate = (run: RunContext): Promise<GateResult> => finishGate(run);
 
 function stubFor(call: ToolCall): string {
   const input = JSON.stringify(call.input) ?? '';

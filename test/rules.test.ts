@@ -60,7 +60,7 @@ describe('reference APIs pass at 100%', () => {
   });
 
   it('the scaffolded template prints only pass or n/a and 100%', async () => {
-    const report = await check(copy('templates/api'));
+    const report = await check(copy('templates/api'), false);
     expect(new Set(report.rules.map((r) => r.status))).toEqual(new Set(['pass', 'n/a']));
     expect(report.verdictPct).toBe(100);
     expect(report.green).toBe(true);

@@ -102,7 +102,7 @@ function render(outcomes: RuleOutcome[], verdictPct: number, green: boolean): st
         continue;
       }
       for (const fail of f.failures) {
-        const loc = `${f.file}:${fail.line}${fail.col === undefined ? '' : `:${fail.col}`}`;
+        const loc = fail.line > 0 ? `${f.file}:${fail.line}${fail.col === undefined ? '' : `:${fail.col}`}` : f.file;
         lines.push(`${pad(o.id, W_RULE)}${pad('FAIL', W_STATUS)}${pad(loc, W_LOC)}${fail.message}${fail.fix === undefined ? '' : ` → ${fail.fix}`}`);
       }
     }

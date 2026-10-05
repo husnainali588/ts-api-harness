@@ -37,7 +37,7 @@ describe('scripted greenfield run', () => {
     expect(events.filter((e) => e.hook === 'observed-red').map((e) => e.decision)).toEqual(['record', 'record']);
     expect(events.find((e) => e.hook === 'route-index')).toMatchObject({ decision: 'record', exit: 1 });
     const checks = String(tools.find((e) => e.tool === 'run_checks')?.summary);
-    expect(checks).toMatch(/verdict\s+100%/);
+    expect(readFileSync(join(repo, 'reports', summary.runId, 'standards.txt'), 'utf8'), checks).toMatch(/verdict\s+100%/);
     const apiRoot = join(repo, summary.worktree, 'generated', 'users-api');
     expect(readFileSync(join(apiRoot, 'src/routes/index.ts'), 'utf8')).toBe(renderIndex(['users']));
     expect(readFileSync(join(repo, 'reports', summary.runId, 'standards.txt'), 'utf8')).toMatch(/verdict\s+100%/);

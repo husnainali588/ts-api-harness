@@ -115,3 +115,26 @@ Result: DONE — commit "feat: standards rules, harness check, greenfield templa
 - Done-when: `npx harness check --api test/fixtures/good-api` → verdict 100%, exit 0; every rule's bad mutation fails with
   file:line (test/rules.test.ts); template → only pass/n/a, 100%; sample API (hand-written Express) → 100%.
 - Scripted greenfield run on the real template reaches run_checks 100% through G1/G2 (test/greenfield.test.ts).
+- Commit `d71dbfa`, pushed.
+
+## Phase 5 — problem-probe (our addition) + finish gate (G3)
+
+Plan:
+1. Rule plugin `problem-probe` (required): a fresh subprocess (tsx) imports the API's `createApp()`, reads `routeTable`
+   (fallback: AST routes with schemas imported by export name; neither → unproven), boots it on 127.0.0.1:0 and
+   sends schema-generated requests: malformed JSON, empty body, each required field missing, each field wrong type,
+   malformed/unknown ids, unknown route, wrong method, limit=0/10000, garbage cursor, duplicate unique field,
+   idempotency replay + key reuse. Every non-2xx must be problem+json, parse as a Problem, status = HTTP status,
+   instance = path, no stack trace, status in the family's allowed set. One line per family per route; transcript
+   to runs/<id>/raw.
+2. `core/finish.ts` (G3): full suite green via the harness runner; red→green continuity for every red case;
+   strict tsc + `harness check` at 100% with zero unproven required rules; failing lines back to the model.
+3. Tests: probe passes on good-api and the sample API; fails when (a) the 404 catch-all, (b) the malformed-JSON
+   handler, (c) the problem+json media type, (d) `instance` is removed. G3: finish rejected with a failing rule,
+   a deleted red test, a skipped red test, an unproven rule; honest run green.
+
+Result: DONE — commit "feat: problem-probe gate + finish gate".
+- Built: plugins/rules/problem-probe (index + subprocess runner), core/finish.ts (G3, wired as the loop's default gate),
+  plugins/rules/task-coverage (added: without it, finishing on the untouched scaffold would have been green).
+- Probe: good-api 25/25 probes, sample API 25/25 (static-route fallback); fails on (a)–(d); UNPROVEN when unbootable.
+- Tests: 16 files / 133 tests passed; typecheck clean; leak test green.

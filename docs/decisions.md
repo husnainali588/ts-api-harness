@@ -32,4 +32,9 @@
 - Implicit-any detection flags any-typed expressions except where the contextual type is `unknown` (e.g. `parseInput(schema, req.body)`, `const x: unknown = JSON.parse(…)`); it runs on src/ only, explicit escapes (`any`, `!`, ts-ignore, eslint-disable) on src/ and test/.
 - `rest-conventions` checks 409 only when a task declares unique fields; `harness check --api` accepts `--task` and the run gate always passes the task.
 - Rule summaries: ratio rules print "passed/checked unit"; count rules (tsc-strict, no-unsafe-ts) print the failure count ("0 errors").
+- problem-probe boots the API in a fresh `node --import tsx` subprocess every time, so code the model just changed is never served from a module cache; it binds 127.0.0.1:0 only.
+- problem-probe takes routes and schemas from `createApp().routeTable`; for APIs without one (hand-written Express) it falls back to static route discovery and imports the parsed schemas by export name.
+- Probe families and allowed statuses: malformed-json {400}, empty-body {400,422}, missing-field/wrong-type {422}, malformed-id {400,404,422}, unknown-id {404} (+422 with a body), unknown-route {404}, wrong-method {404,405}, list-bounds {400,422}, duplicate {409}, idempotency replay identical + reuse {409}.
+- Added rule `task-coverage` (not in the original rule list): G3 had no check that the task was built at all, so finish on the untouched scaffold would pass; it maps behaviour verbs (create/list/get/update/delete) to required routes, and brownfield task fields to schema keys.
+- G3 continuity treats a file-level load red as satisfied once that file loads with ≥1 passing case and nothing failing or skipped.
 - Wrong method on an existing path → 404 problem (Express has no automatic 405); the probe's allowed set for "wrong method" is {404, 405}.
