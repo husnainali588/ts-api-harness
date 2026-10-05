@@ -80,6 +80,8 @@ export interface RunSummary {
   apiRoot: string; // relative to the worktree
   gate: GateResult | null;
   cost: { paid: boolean; requestedModel: string | null; cap: number | null; spentBefore: number; spentAfter: number };
+  writtenFiles: string[]; // API-root-relative
+  contractChanges: { breaking: string[]; additive: string[] } | null;
   prUrl: string | null;
   honesty: { proven: string[]; unproven: string[]; outOfReach: string[] };
 }
@@ -388,6 +390,8 @@ export async function runHarness(opts: RunOptions): Promise<RunSummary> {
     apiRoot: workspace.apiRel,
     gate,
     cost: { paid, requestedModel: driver.model ?? null, cap: cap ?? null, spentBefore, spentAfter: spend.spent() },
+    writtenFiles: [...state.writtenFiles],
+    contractChanges: state.contractChanges ?? null,
     prUrl: null,
     honesty: {
       proven: gate?.green === true ? gate.lines : [],

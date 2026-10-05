@@ -8,6 +8,7 @@ import { bench } from './bench.js';
 import { runChecks } from './checks.js';
 import { newRunId, runHarness } from './loop.js';
 import { loadRegistry, type Registry } from './registry.js';
+import { ship, type ShipResult } from './ship.js';
 import { loadTask } from './task.js';
 
 export const HARNESS_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -152,7 +153,21 @@ export async function runCommand(args: string[], io: Io): Promise<number> {
   const c = summary.cost;
   io.out(`model      requested ${c.requestedModel ?? '(local)'}, served ${summary.servedBy.join(', ') || '-'} via ${summary.transports.join(', ') || '-'}`);
   io.out(`spend      ${c.paid ? `paid — run cap ${c.cap ?? 'none'}, ledger ${c.spentBefore} → ${c.spentAfter} input tokens` : 'free (not counted)'}`);
+  if (values.ship && summary.status === 'green') return printShip(await ship({ repoRoot: HARNESS_ROOT, runId: summary.runId, log: (l) => io.out(l) }), io);
+  if (values.ship) io.out('ship       not attempted: the run is not green');
   return summary.status === 'green' ? 0 : 1;
+}
+
+function printShip(result: ShipResult, io: Io): number {
+  io.out(`ship       ${result.status.toUpperCase()} — ${result.reason}${result.prUrl === undefined ? '' : ` — ${result.prUrl}`}`);
+  return result.status === 'shipped' ? 0 : 1;
+}
+
+export async function shipCommand(args: string[], io: Io): Promise<number> {
+  const { values } = parseArgs({ args, strict: true, options: { run: { type: 'string' } } });
+  if (values.run === undefined) throw new Error('ship needs --run <runId>');
+  loadDotEnv();
+  return printShip(await ship({ repoRoot: HARNESS_ROOT, runId: values.run, log: (l) => io.out(l) }), io);
 }
 
 export async function checkCommand(args: string[], io: Io): Promise<number> {
@@ -218,6 +233,7 @@ export async function benchCommand(args: string[], io: Io): Promise<number> {
 }
 
 const COMMANDS: Record<string, Command> = {
+  ship: (args, io) => shipCommand(args, io),
   bench: (args, io) => benchCommand(args, io),
   check: (args, io) => checkCommand(args, io),
   plugins: (args, io) => pluginsCommand(args, io),
