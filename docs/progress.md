@@ -161,6 +161,23 @@ Result: PARTLY DONE — offline part commit `0bef81f`, blocked-key note `150480b
   | 20261005083903-4a896f | openai | openai/gpt-5.4-mini | 0 | 0 | 0 | $0 |
   Both: `401 Missing Authentication header` on the first request — OpenRouter returns the same for an invalid token.
 - BLOCKED: smoke tests and the free rehearsal need a valid OPENROUTER_API_KEY in `.env` (QUESTIONS.md).
+- UNBLOCKED after Phase 11 (keys fixed by the user). `harness doctor`: claude and openai drivers both "ready — set:
+  OPENROUTER_API_KEY"; OPENAI_API_KEY is **not** visible to the harness, so the openai driver uses the gateway.
+  Re-run at the user's request (same caps `--max-run-tokens 150000 --total-budget 650000`):
+  | run id | driver | model (served) | transport | input | output | ledger total | est. cost |
+  |---|---|---|---|---|---|---|---|
+  | 20261005093629-ad605f | claude | anthropic/claude-haiku-4.5 | gateway | 8,841 | 3,100 | 8,841 | ≈ $0.024 ($1/$5 per M) |
+  | 20261005093703-f0f8d8 | openai | openai/gpt-5.4-mini | gateway | 8,896 | 358 | 17,737 | ≈ $0.008 ($0.75/$4.50 per M) |
+  Both UNPROVEN by design (3-turn cap) with valid tool calls: claude get_task/get_standard ×3/list_files/write_file
+  (a users test first); openai get_standard/get_task/list_files/read_file ×8.
+- Free rehearsal `20261005093822-7f9bba` (openai driver via gateway, `qwen/qwen3.8-27b:free`, `OPENAI_API_KEY=` for that
+  command only): stopped at turn 6 by `429 Provider returned error` after the SDK's 5 retries — free tier rate limit.
+  39,168 input / 5,706 output tokens, free (not counted; ledger stays 17,737). Not retried (AUTORUN §4: skip if
+  rate-limited). Its 6-turn transcript replays through the scripted driver with the identical tool sequence.
+- Finding from the live transcript: actual input grew 1.7k → 10k tokens in 6 turns because the model read whole
+  template files. Fix (plugin, core untouched): read_file without a range on files > 60 lines returns an outline
+  (top-level declarations + line numbers) and asks for a range; raw full text still goes to disk / to the baseline.
+  Offline bench on that real transcript: 74% mean per turn over turns 1–6 (was ~65% at turn 6 before the outline).
 
 ## Phase 7 — JIT context, compaction, baseline, token report
 

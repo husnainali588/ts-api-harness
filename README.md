@@ -1,11 +1,48 @@
 # ts-api-harness
 
-An agent harness that governs TypeScript REST API work: a loop that calls a model through a driver, runs every
-tool call through hooks that can block, record or pass, fetches context just in time, and ends only when
-deterministic checks say the work is done. Built for the sf-harness engineering assignment
-(`docs/assignment/brief.pdf`).
+An agent **harness** (not an agent) that governs TypeScript REST API work. A loop calls a model through a **driver**,
+runs every tool call through **hooks** that can block, record or pass, fetches context **just in time**, and ends only
+when **deterministic checks** — never the model — say the work is done. It builds new APIs from a task file
+(greenfield) and makes scoped, contract-safe changes to existing ones (brownfield). Built for the sf-harness
+engineering assignment (`docs/assignment/brief.pdf`).
 
-**Status: in progress.** Setup, grader commands, design note and evidence links are added as the build lands.
+- **Core directory: `core/` — must stay untouched.** Every extension is a folder under `plugins/` or `drivers/`
+  ([docs/extending.md](docs/extending.md)).
+- Design note: [docs/design.md](docs/design.md) · decisions: [docs/decisions.md](docs/decisions.md) ·
+  red team: [docs/redteam.md](docs/redteam.md) · build log: [docs/progress.md](docs/progress.md)
+- **Our own addition: `problem-probe`** — boots the API and probes every route with schema-generated bad requests
+  (malformed JSON, missing/wrong fields, bad ids, unknown routes, wrong methods, pagination bounds, duplicates,
+  idempotency replay); every error must be a correct `application/problem+json`. It is a required rule, so it is part
+  of `harness check` and the finish gate.
+
+## Setup (one command)
+
+```
+npm run setup        # Node >= 22; installs, creates .env from .env.example if missing, runs the self-tests
+npx harness doctor   # environment check; prints env variable NAMES, never values
+```
+
+Keys (in `.env`, never committed): either native keys — `ANTHROPIC_API_KEY` for `--driver claude`,
+`OPENAI_API_KEY` for `--driver openai` — or a single `OPENROUTER_API_KEY` for both. Each driver picks native first,
+then the gateway. Optional: `HARNESS_CLAUDE_MODEL`, `HARNESS_OPENAI_MODEL` (defaults: Claude Haiku 4.5, GPT-5.4 Mini),
+`HARNESS_MAX_RUN_TOKENS`, `HARNESS_TOTAL_BUDGET` (spend caps, enforced in code).
+
+## Grader commands
+
+```
+npx harness run   --task tasks/users.yaml --driver claude      # greenfield, writes runs/<id>/
+npx harness run   --task tasks/users.yaml --driver openai      # same task, other provider
+npx harness check --api generated/users-api [--task tasks/users.yaml]   # exit 0 only at 100%
+npx harness bench --task tasks/users.yaml --driver claude [--baseline-turns 8] [--actual-run <runId>]  # tokens/<runId>.json
+npx harness run   --task tasks/orders-add-field.yaml --driver claude --ship   # brownfield change + pull request
+npx harness ship  --run <runId>
+npx harness plugins                                            # every driver/tool/hook/rule/context with its path
+bash scripts/grade.sh                                          # offline grader simulation
+bash scripts/extension-demo.sh                                 # three additions, no core change
+```
+
+Useful flags: `--max-turns N`, `--max-run-tokens N`, `--total-budget N`, `--baseline`, `--script <file>` with
+`--driver scripted` (free, deterministic; replays recorded transcripts too).
 
 ## Task files and sample API
 
@@ -18,11 +55,14 @@ No task file or sample API was provided with the assignment, only the brief. We 
 - `tasks/orders-add-field.yaml` — brownfield: add an optional `notes` field to orders without breaking the contract.
 
 The task format uses the brief's own keys — `resource`, `fields`, `behaviours` — plus `api:` for brownfield
-tasks. **A grader can drop their own task file into `tasks/` and run it:**
+tasks. **A grader can drop their own task file into `tasks/` and run it** with the commands above; the loader
+tolerates small format differences (YAML or JSON, `behaviors`, field lists or maps, nested `resource`, extra keys —
+see `docs/decisions.md`).
 
-```
-npx harness run --task tasks/<your-task>.yaml --driver claude
-npx harness run --task tasks/<your-task>.yaml --driver openai
-```
+## Evidence
 
-The loader is built to tolerate small format differences (see `docs/decisions.md`).
+<!-- EVIDENCE -->
+
+## Team
+
+- One engineer (with Claude Code): harness core, drivers, plugins, template, checks, probe, evidence.
