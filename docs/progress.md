@@ -69,3 +69,23 @@ Result: DONE — commit "feat(core): loop, hooks, worktree, file tools, G1 path 
   shows exits 0/1/2 (test/loop.test.ts).
 - Note: the finish gate is a placeholder that is never green until Phase 5 wires G3 (runs end UNPROVEN, by design).
 - Note: core is 1,685 lines incl. comments and type declarations — over the 1,500 soft target (QUESTIONS.md).
+- Commit `ca16d72`, pushed.
+
+## Phase 3 — test runner, observations, observed red (G2)
+
+Plan:
+1. `core/tests.ts`: run vitest in the API root as a subprocess (JSON reporter, report file outside the workspace),
+   parse per-test-case observations (file, full name, status, failure kind, test-file sha256, turn), write
+   `.harness/runs/<id>/observations.json` (only via run_tests); keep every red case ever seen for G3.
+2. Import-failure loads (`Cannot find module …`) count as red (`load-error`); syntax errors in a test do not.
+3. Source↔test map with ts-morph from import specifiers (static, type-only, re-export, dynamic) — resolves before
+   the source exists — plus the `src/x/y.ts` ↔ `test/x/y.test.ts` convention.
+4. Tool `run_tests` (compact PASS/FAIL summary, raw to disk); hook `observed-red` (G2) on src/ writes.
+5. Workspaces get `node_modules` by symlinking an existing install (template / fixture), else `npm ci`.
+6. `templates/api` base (package.json, lockfile, strict tsconfig, vitest config) so greenfield runs can test.
+7. Gate tests: source before test; test never run; test seen green not red; test + source same turn; syntax-error
+   "red"; honest TDD cycle (load-error red and assertion red); mapping through imports.
+
+Result: DONE — commit "feat(core): test runner, observations, observed-red gate (G2)".
+- Tests: 12 files / 102 tests passed; typecheck clean; leak test green.
+- Done-when: all G2 bypass tests blocked; scripted honest cycle test → red → source → green passes.

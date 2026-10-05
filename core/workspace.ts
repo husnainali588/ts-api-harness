@@ -1,5 +1,5 @@
 // Git worktree per run and safe path resolution (spec §5.8, §5.5 model workspace, §6 G1).
-import { cpSync, existsSync, lstatSync, mkdirSync, realpathSync } from 'node:fs';
+import { cpSync, existsSync, lstatSync, mkdirSync, realpathSync, symlinkSync } from 'node:fs';
 import { basename, extname, isAbsolute, join, normalize, relative, resolve, sep } from 'node:path';
 import { exec } from './exec.js';
 import type { Task } from './task.js';
@@ -34,6 +34,7 @@ export async function createWorkspace(opts: {
   runId: string;
   driverId: string;
   templateDir?: string; // greenfield scaffold source
+  harnessRoot?: string; // where installed node_modules for known APIs can be borrowed from
 }): Promise<Workspace> {
   const short = opts.runId.slice(-6);
   const branch = `harness/${taskSlug(opts.task)}-${opts.driverId}-${short}`;
@@ -50,7 +51,29 @@ export async function createWorkspace(opts: {
       cpSync(opts.templateDir, apiRoot, { recursive: true, filter: (src) => !src.split(sep).includes('node_modules') });
     }
   }
+  await provideNodeModules(apiRoot, [
+    join(opts.repoRoot, apiRel, 'node_modules'),
+    ...(opts.harnessRoot === undefined ? [] : [join(opts.harnessRoot, apiRel, 'node_modules')]),
+    ...(opts.task.mode === 'greenfield' && opts.templateDir !== undefined ? [join(opts.templateDir, 'node_modules')] : []),
+  ]);
   return { worktree, branch, apiRoot: realpathSync(apiRoot), apiRel };
+}
+
+/**
+ * Installed packages for the API: symlink an existing install (fast, read-only for the model — path-guard hides
+ * node_modules), else `npm ci --ignore-scripts` when a lockfile exists. Without either, test runs are unproven.
+ */
+async function provideNodeModules(apiRoot: string, candidates: string[]): Promise<void> {
+  const target = join(apiRoot, 'node_modules');
+  if (existsSync(target)) return;
+  const source = candidates.find((c) => existsSync(join(c, '.bin')));
+  if (source !== undefined) {
+    symlinkSync(source, target, 'dir');
+    return;
+  }
+  if (existsSync(join(apiRoot, 'package-lock.json'))) {
+    await exec('npm', ['ci', '--ignore-scripts', '--no-audit', '--no-fund'], { cwd: apiRoot, timeoutMs: 600_000 });
+  }
 }
 
 export async function removeWorkspace(repoRoot: string, ws: Workspace, deleteBranch = false): Promise<void> {

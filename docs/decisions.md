@@ -20,4 +20,9 @@
 - Subprocesses get a scrubbed env (names ending `_KEY`, `_TOKEN`, `_SECRET`, `_PASSWORD`, `_CREDENTIALS` or containing `API_KEY` removed), so model-written tests run by the harness cannot read keys; only harness-owned ship steps keep them.
 - `.env` is loaded by the CLI with `process.loadEnvFile`; tests set `HARNESS_NO_DOTENV=1` so they never touch real keys.
 - `npx harness` resolves the package's own `bin` (verified with npm 11), so no global link is needed.
+- G2 "observed red" = a mapped test case was recorded failing at any earlier point in this run (not necessarily right now), so standards fixes after green don't need a new failing test; every red case must still end green (G3 continuity).
+- A test file that fails to load because its import does not resolve yet counts as red (`load-error`, the classic TDD red); a test that fails to load for any other reason (syntax error) does not.
+- Mapping is direct imports (static, type-only, re-export, dynamic) + the naming convention, not the transitive import graph: one end-to-end test must not unlock every source file.
+- Workspaces symlink `node_modules` from an existing install (template, fixture) instead of `npm ci` per run; `.gitignore` lists `node_modules` without a slash because a symlink is not a directory to git.
+- The vitest JSON report is written outside the workspace and parsed by the harness; the in-memory ledger, not the file, is the source of truth (model-written test code runs with filesystem access — see honesty boundary).
 - Wrong method on an existing path → 404 problem (Express has no automatic 405); the probe's allowed set for "wrong method" is {404, 405}.

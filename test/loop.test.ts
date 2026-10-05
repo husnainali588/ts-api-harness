@@ -16,7 +16,7 @@ describe('runHarness with the scripted driver', () => {
     const summary = await scriptedRun(
       repo,
       [
-        { toolCalls: [call('write_file', { path: 'src/hello.ts', content: 'export const hello = 1;\n' })] },
+        { toolCalls: [call('write_file', { path: 'test/hello.test.ts', content: '// hello\n' })] },
         { toolCalls: [call('write_file', { path: '../escape.ts', content: 'x' })] },
         { toolCalls: [call('finish', { summary: 'done' })] },
       ],
@@ -25,7 +25,7 @@ describe('runHarness with the scripted driver', () => {
     expect(summary.status).toBe('green');
     expect(summary.reason).toBe('finish gate green');
     const worktree = join(repo, summary.worktree);
-    expect(readFileSync(join(worktree, 'generated', 'users-api', 'src', 'hello.ts'), 'utf8')).toContain('hello');
+    expect(readFileSync(join(worktree, 'generated', 'users-api', 'test', 'hello.test.ts'), 'utf8')).toContain('hello');
     expect(existsSync(join(worktree, 'generated', 'escape.ts'))).toBe(false);
     // The user's working tree is untouched.
     expect(existsSync(join(repo, 'generated'))).toBe(false);

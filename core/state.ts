@@ -13,7 +13,8 @@ export function sha256(text: string | Buffer): string {
 export class RunState implements RunStateView {
   readonly writtenFiles: string[] = [];
   observations: TestCaseObservation[] = [];
-  readonly redCases: { file: string; name: string }[] = [];
+  /** Every test case ever seen red in this run (file + full name); all must end green (G3 continuity). */
+  readonly redCases: { file: string; name: string; turn: number; kind: string }[] = [];
   acceptedScope: string[] | null = null;
   readonly openBlocks: string[] = [];
   lastTest: string | undefined;

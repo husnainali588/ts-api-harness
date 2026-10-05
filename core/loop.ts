@@ -11,6 +11,7 @@ import { findDriver, loadRegistry, type Registry } from './registry.js';
 import type { HarnessServices, HookContext, ToolContext, ToolDefinition, ToolOutput } from './sdk.js';
 import { Evidence, RunState, fingerprint } from './state.js';
 import { loadTask, renderTaskBrief, type Task } from './task.js';
+import { mappedTests, runTests } from './tests.js';
 import { TokenLedger } from './tokens.js';
 import { createWorkspace, resolveInside, type Workspace } from './workspace.js';
 
@@ -82,8 +83,19 @@ export function newRunId(): string {
 const notAvailable = (what: string): Promise<ToolOutput> =>
   Promise.resolve({ summary: `${what} is not available in this harness build.`, isError: true });
 
-const defaultServices = (): HarnessServices => ({
-  runTests: () => notAvailable('run_tests'),
+export function harnessRunDir(run: RunContext): string {
+  return join(run.repoRoot, '.harness', 'runs', run.runId);
+}
+
+const defaultServices = (run: RunContext): HarnessServices => ({
+  runTests: () =>
+    runTests({
+      apiRoot: run.workspace.apiRoot,
+      runDir: harnessRunDir(run),
+      state: run.state,
+      turn: run.turn,
+      saveRaw: (label, content) => run.evidence.saveRaw(label, content),
+    }),
   runChecks: () => notAvailable('run_checks'),
   proposeScope: () => notAvailable('propose_scope'),
 });
@@ -123,8 +135,10 @@ export async function runHarness(opts: RunOptions): Promise<RunSummary> {
     runId,
     driverId: driverDef.id,
     templateDir: join(opts.harnessRoot, 'templates', 'api'),
+    harnessRoot: opts.harnessRoot,
   });
   const state = new RunState();
+  state.testMap = (source) => mappedTests(workspace.apiRoot, source);
   const run: RunContext = { runId, task, registry, workspace, state, evidence, harnessRoot: opts.harnessRoot, repoRoot: opts.repoRoot, turn: 0 };
   const services = (opts.services ?? defaultServices)(run);
   const finishGate = opts.finishGate ?? defaultGate;
