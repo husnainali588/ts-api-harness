@@ -138,3 +138,43 @@ Result: DONE — commit "feat: problem-probe gate + finish gate".
   plugins/rules/task-coverage (added: without it, finishing on the untouched scaffold would have been green).
 - Probe: good-api 25/25 probes, sample API 25/25 (static-route fallback); fails on (a)–(d); UNPROVEN when unbootable.
 - Tests: 16 files / 133 tests passed; typecheck clean; leak test green.
+- Commit `23dd318`, pushed.
+
+## Phase 6 — real drivers, smoke test, rehearsal
+
+Plan:
+1. Verify OpenRouter docs + model list first; record in docs/decisions.md.
+2. drivers/claude (Messages format; native key or OpenRouter `https://openrouter.ai/api` with Bearer auth) and
+   drivers/openai (Chat Completions; native or `https://openrouter.ai/api/v1`); retries; usage incl. cache; transport +
+   served model per turn. Recorded-fixture tests for all four combinations.
+3. Spend ledger `.harness/spend.json`, `--max-run-tokens` / `--total-budget` (flags override env), effective cap =
+   min(per-run, remaining), refuse under 20,000 remaining, cap stop = UNPROVEN with evidence, `:free` not counted.
+4. Replay of recorded transcripts with the scripted driver.
+5. Live: smoke each driver (--max-turns 3), then one free rehearsal on the openai driver.
+
+Result: PARTLY DONE — offline part commit `0bef81f`, blocked-key note `150480b`.
+- Tests: 18 files / 149 tests passed; typecheck clean; leak test green.
+- Live runs (both with `--max-run-tokens 150000 --total-budget 650000`):
+  | run id | driver | model | input | output | ledger total | est. cost |
+  |---|---|---|---|---|---|---|
+  | 20261005083744-25f7f1 | claude | anthropic/claude-haiku-4.5 | 0 | 0 | 0 | $0 |
+  | 20261005083903-4a896f | openai | openai/gpt-5.4-mini | 0 | 0 | 0 | $0 |
+  Both: `401 Missing Authentication header` on the first request — OpenRouter returns the same for an invalid token.
+- BLOCKED: smoke tests and the free rehearsal need a valid OPENROUTER_API_KEY in `.env` (QUESTIONS.md).
+
+## Phase 7 — JIT context, compaction, baseline, token report
+
+Plan:
+1. Context plugins standards (`get_standard`), schemas (`get_schema`), task (`get_task` sections), each with fetch() +
+   frontLoad().
+2. core/context.ts + loop: baseline front-loads API root files + task + all frontLoads (refreshed each turn), raw tool
+   results, no compaction; actual keeps 6 exchanges, stubs older results, elides old tool-call payloads.
+3. `harness bench` → tokens/<runId>.json from ledgers only, `--baseline-turns`, `--actual-run` (same task sha + driver).
+4. Test bench offline with the scripted driver; replay a scripted greenfield session (stand-in for the blocked
+   rehearsal) in both modes; fix fattest turns if under 90%.
+
+Result: DONE with an open finding — commit `fa489dd`.
+- Tests: 19 files / 154 tests passed; typecheck clean; leak test green.
+- Offline estimate (chars/4, not evidence): 80.3% mean per turn over aligned turns 1–8; 82.3% over the full 14-turn
+  script. Eaten by ~1.2k fixed tokens per turn on both sides (tools, prompt, brief) while early history is the same on
+  both sides; trimmed tool definitions and schema noise; window kept at 6 (QUESTIONS.md).
