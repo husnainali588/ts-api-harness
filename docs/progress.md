@@ -226,3 +226,10 @@ Plan:
 3. scripts/extension-demo.sh: per example → copy into plugins/, `git add -N`, `git diff --stat`, assert only that
    plugin folder changed and nothing under core/, run `harness plugins` + `harness check --api <fixture>`, remove.
 4. test/extensibility.test.ts: the same in a temp git copy. docs/extending.md: one section per plugin kind.
+
+Result: DONE — commits "feat(examples): three drop-in extensions and the extension demo" + "test: extensibility".
+- scripts/extension-demo.sh passes all three: `git diff --stat` shows only `plugins/<kind>/<name>/index.ts`, core/
+  untouched; each listed by `harness plugins`; rules print their own FAIL lines with file:line:col
+  (orm-explicit-columns 3/5 queries, no-console-in-handlers 1/2 handlers) and summary lines.
+- Tests: 22 files / 170 tests passed; typecheck clean; leak test green (now also scans examples/).
+- Core is frozen from here.
