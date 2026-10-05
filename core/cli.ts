@@ -1,8 +1,10 @@
 // harness run | bench | check | ship | plugins | doctor   (spec §4)
 import { existsSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
+import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { parseArgs } from 'node:util';
 import { exec } from './exec.js';
+import { runHarness } from './loop.js';
 import { loadRegistry, type Registry } from './registry.js';
 
 export const HARNESS_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -99,9 +101,55 @@ export async function doctorCommand(_args: string[], io: Io, root: string = HARN
   return ok ? 0 : 1;
 }
 
+export function intFlag(value: string | undefined, name: string): number | undefined {
+  if (value === undefined || value === '') return undefined;
+  const n = Number(value);
+  if (!Number.isInteger(n) || n <= 0) throw new Error(`--${name} must be a positive integer, got "${value}"`);
+  return n;
+}
+
+export async function runCommand(args: string[], io: Io): Promise<number> {
+  const { values } = parseArgs({
+    args,
+    strict: true,
+    options: {
+      task: { type: 'string' },
+      driver: { type: 'string' },
+      baseline: { type: 'boolean', default: false },
+      ship: { type: 'boolean', default: false },
+      'max-turns': { type: 'string' },
+      'max-run-tokens': { type: 'string' },
+      'total-budget': { type: 'string' },
+      script: { type: 'string' },
+    },
+  });
+  if (values.task === undefined || values.driver === undefined) throw new Error('run needs --task <file> and --driver <id>');
+  loadDotEnv();
+  const taskPath = relative(HARNESS_ROOT, resolve(process.cwd(), values.task));
+  const maxTurns = intFlag(values['max-turns'], 'max-turns');
+  const maxRunTokens = intFlag(values['max-run-tokens'], 'max-run-tokens') ?? intFlag(process.env.HARNESS_MAX_RUN_TOKENS, 'HARNESS_MAX_RUN_TOKENS');
+  const summary = await runHarness({
+    harnessRoot: HARNESS_ROOT,
+    repoRoot: HARNESS_ROOT,
+    taskPath,
+    driverId: values.driver,
+    baseline: values.baseline,
+    ...(maxTurns === undefined ? {} : { maxTurns }),
+    ...(maxRunTokens === undefined ? {} : { maxRunTokens }),
+    ...(values.script === undefined ? {} : { script: resolve(process.cwd(), values.script) }),
+    log: (line) => io.out(line),
+  });
+  const t = summary.tokens;
+  io.out(`status     ${summary.status.toUpperCase()} — ${summary.reason}`);
+  io.out(`evidence   runs/${summary.runId}/ (branch ${summary.branch})`);
+  io.out(`tokens     input ${t.totalInputTokens}, output ${t.totalOutputTokens}, ${t.turns} turns, peak ${t.peakInputTokens} (${t.source})`);
+  return summary.status === 'green' ? 0 : 1;
+}
+
 const COMMANDS: Record<string, Command> = {
   plugins: (args, io) => pluginsCommand(args, io),
   doctor: (args, io) => doctorCommand(args, io),
+  run: (args, io) => runCommand(args, io),
 };
 
 export function registerCommand(name: string, command: Command): void {

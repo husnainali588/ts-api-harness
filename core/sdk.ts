@@ -7,6 +7,7 @@ import type { Task } from './task.js';
 
 export type { Driver, ToolCall } from './driver.js';
 export type { Task } from './task.js';
+export { renderTaskBrief } from './task.js';
 
 // ── shared runtime services ────────────────────────────────────────────────────────────────────────────
 
@@ -59,6 +60,8 @@ export interface ToolContext {
   context(name: string, key: string): Promise<string>;
   /** Stores raw output on disk; returns the repo-relative path to reference in summaries. */
   saveRaw(label: string, content: string): string;
+  /** Scratch memory private to this tool for the whole run (e.g. a re-read cache). */
+  readonly memory: Map<string, unknown>;
   /** Harness-side services a few built-in tools need (test runner, checks, scope). */
   readonly services: HarnessServices;
 }
@@ -67,7 +70,6 @@ export interface HarnessServices {
   runTests(): Promise<ToolOutput>;
   runChecks(): Promise<ToolOutput>;
   proposeScope(files: string[], reason: string): Promise<ToolOutput>;
-  addDependency(name: string, dev: boolean): Promise<ToolOutput>;
 }
 
 export interface ToolOutput {
@@ -75,6 +77,8 @@ export interface ToolOutput {
   raw?: string; // full output; goes to disk, referenced by path
   isError?: boolean;
   signal?: 'finish'; // the finish tool asks the loop to run the finish gate
+  wrote?: string[]; // API-root-relative files this call wrote
+  stub?: string; // one-line replacement once compaction drops this result
 }
 
 // ── tools ─────────────────────────────────────────────────────────────────────────────────────────────

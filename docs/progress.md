@@ -44,3 +44,28 @@ Result: DONE — see commit "feat(core): skeleton, driver contract, registry".
 - Tests: `npm test` 5 files / 34 tests passed; `npm run typecheck` clean; leak test green.
 - Done-when: `npx harness plugins` lists `scripted  drivers/scripted/index.ts`.
 - Task YAML parse (left UNPROVEN in 0b) now proven by test/task.test.ts.
+- Commit `2bcbced`, pushed.
+
+## Phase 2 — loop, hooks, file tools, G1
+
+Plan:
+1. `core/workspace.ts`: git worktree per run under `.harness/worktrees/<runId>` on `harness/<task>-<driver>-<short>`;
+   API root = `generated/<resource>-api` (greenfield) or the task's `api` path (brownfield); realpath-safe resolution.
+2. `core/redact.ts` (env secret values + key-format regexes); `core/state.ts` (run state + evidence writer: events.jsonl,
+   transcript, raw/, summary.json with fingerprint of task + plugins/hooks + plugins/rules).
+3. `core/hooks.ts`: pre/post pipeline, fail-closed on hook crash, every decision logged with exit 0/1/2.
+4. `core/loop.ts` per §5.2 (one call at a time, nudge once, turn budget, consecutive-block stop); `core/context.ts`
+   (system prompt, state card); `core/tokens.ts` ledger; `harness run` command.
+5. Tool plugins: list_files, read_file, search_code, write_file, edit_file, add_dependency, get_task, finish.
+6. Hook plugin `path-guard` (G1): workspace-only paths for reads and writes, no traversal/absolute/symlink escape,
+   protected files (package.json, tsconfig*, test-runner and eslint config, .git, .harness, node_modules).
+7. Gate tests with the scripted driver for every G1 bypass; loop test proves events.jsonl has exits 0/1/2.
+
+Result: DONE — commit "feat(core): loop, hooks, worktree, file tools, G1 path guard".
+- Built: core/{loop,hooks,workspace,state,redact,context,tokens}.ts, `harness run`; 8 tool plugins; hooks path-guard (G1)
+  and write-log (record, exit 1).
+- Tests: 10 files / 85 tests passed; typecheck clean; leak test green. 22 G1 bypass attempts blocked with reason + fix.
+- Done-when: scripted run writes `src/hello.ts` inside the worktree; traversal and protected writes blocked; events.jsonl
+  shows exits 0/1/2 (test/loop.test.ts).
+- Note: the finish gate is a placeholder that is never green until Phase 5 wires G3 (runs end UNPROVEN, by design).
+- Note: core is 1,685 lines incl. comments and type declarations — over the 1,500 soft target (QUESTIONS.md).

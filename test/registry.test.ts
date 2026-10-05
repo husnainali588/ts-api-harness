@@ -98,7 +98,8 @@ describe('loadRegistry on a temp copy', () => {
     const registry = await loadRegistry(root);
     expect(registry.tools.map((t) => t.def.name)).not.toContain('off_tool');
     expect(registry.tools.find((t) => t.def.name === 'my_tool')?.source).toBe('extra/my_tool/index.ts');
-    expect(registry.hooks.map((h) => h.def.id)).toEqual(['late', 'early']);
+    expect(registry.hooks.map((h) => h.def.id).filter((id) => id === 'late' || id === 'early')).toEqual(['late', 'early']);
+    expect(registry.hooks.find((h) => h.def.id === 'late')?.def.order).toBe(1);
   });
 
   it('rejects an invalid registry.json', async () => {

@@ -1,7 +1,9 @@
-import { cpSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { Io } from '../core/cli.js';
+import { runHarness, type RunOptions, type RunSummary } from '../core/loop.js';
 
 export const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -30,6 +32,70 @@ export function writeFile(root: string, rel: string, content: string): string {
 
 export function removeDir(dir: string): void {
   rmSync(dir, { recursive: true, force: true });
+}
+
+function gitSync(cwd: string, args: string[]): void {
+  execFileSync('git', ['-c', 'user.name=harness-test', '-c', 'user.email=test@example.invalid', ...args], { cwd, stdio: 'pipe' });
+}
+
+/**
+ * A throwaway git repo shaped like the harness repo's inputs: the task files and the sample API (without
+ * node_modules), committed on main. Runs create their worktrees inside it.
+ */
+export function makeRepo(prefix = 'repo', extra: (dir: string) => void = () => {}): string {
+  const dir = tempDir(prefix);
+  cpSync(join(REPO_ROOT, 'tasks'), join(dir, 'tasks'), { recursive: true });
+  cpSync(join(REPO_ROOT, 'fixtures', 'sample-api'), join(dir, 'fixtures', 'sample-api'), {
+    recursive: true,
+    filter: (src) => !src.includes('node_modules'),
+  });
+  writeFileSync(join(dir, '.gitignore'), 'node_modules/\n.harness/\n.env\n');
+  extra(dir);
+  gitSync(dir, ['init', '-q', '-b', 'main']);
+  gitSync(dir, ['add', '-A']);
+  gitSync(dir, ['commit', '-q', '-m', 'init']);
+  return dir;
+}
+
+export type ScriptLine = { text?: string; toolCalls?: { name: string; input: unknown }[] };
+
+export function writeScript(dir: string, turns: ScriptLine[], name = 'script.jsonl'): string {
+  const path = join(dir, '.harness', name);
+  mkdirSync(dirname(path), { recursive: true });
+  writeFileSync(path, `${turns.map((t) => JSON.stringify(t)).join('\n')}\n`);
+  return path;
+}
+
+export const call = (name: string, input: unknown = {}) => ({ name, input });
+
+let scriptCount = 0;
+
+/** Runs the real loop with the scripted driver against a temp repo made by makeRepo(). */
+export function scriptedRun(repo: string, turns: ScriptLine[], opts: Partial<RunOptions> = {}): Promise<RunSummary> {
+  scriptCount += 1;
+  const script = writeScript(repo, turns, `script-${scriptCount}.jsonl`);
+  return runHarness({
+    harnessRoot: REPO_ROOT,
+    repoRoot: repo,
+    taskPath: 'tasks/users.yaml',
+    driverId: 'scripted',
+    script,
+    maxTurns: turns.length + 2,
+    env: {},
+    ...opts,
+  });
+}
+
+export const greenGate = async () => ({ green: true, lines: ['test gate: green'], unproven: [] });
+
+export function readEvents(repo: string, runId: string): Record<string, unknown>[] {
+  return readFileSync(join(repo, 'runs', runId, 'events.jsonl'), 'utf8')
+    .split('\n')
+    .filter((l) => l !== '')
+    .map((l) => {
+      const parsed: unknown = JSON.parse(l);
+      return typeof parsed === 'object' && parsed !== null ? Object.fromEntries(Object.entries(parsed)) : {};
+    });
 }
 
 export function captureIo(): Io & { lines: string[]; errors: string[]; text(): string } {
