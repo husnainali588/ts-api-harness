@@ -300,3 +300,34 @@ STOPPED: paid run 1 (greenfield claude) hit its cost cap and needs a re-run (AUT
    needs 20–30 turns); or keep the caps and accept that a later run may be refused for budget.
 3. Optional: OPENAI_API_KEY is not visible to the harness (doctor shows only OPENROUTER_API_KEY for the openai driver);
    the openai evidence will say transport "gateway" unless that is fixed.
+
+RESUMED with the user's answers: (1) re-run approved; (2) caps: `--total-budget 800000` everywhere, `--max-run-tokens
+200000` for the greenfield runs, 150000 for brownfield and the bench — anything else failing or exceeding → stop and
+ask; (3) openai driver stays on OpenRouter (gateway), stated in the design note's honesty section; native path
+covered by recorded-fixture tests; (4) an empty, untracked `api-harness/` folder at the repo root (not created by the
+harness) — leave it alone, never read or commit it until the user answers.
+
+Paid run 1b — greenfield `--driver claude --ship --max-run-tokens 200000 --total-budget 800000` (approved re-run):
+| run id | driver | model (served) | transport | turns | input | output | ledger total | est. cost |
+|---|---|---|---|---|---|---|---|---|
+| 20261005100426-810aa6 | claude | anthropic/claude-haiku-4.5 | gateway | 30 | 199,928 | 7,459 | 365,201 | ≈ $0.24 |
+Result: UNPROVEN — `stopped by cost cap (199928 spent + ~6575 next turn > 200000 input tokens)`; not shipped.
+Diagnosis: placeholder-guard blocked placeholder writes at turns 13 and 16 as designed, but at turn 16 the model's
+**first** attempt at src/routes/users.ts was itself a placeholder ("[10098 chars elided from history]") — it imitates
+the shortened tool-call inputs it sees in its own history, even for files it never wrote. After that block it never
+produced the routes file and spent turns 17–30 reading files (8–10k tokens per turn). Root cause is the Phase 7
+compaction that elides large tool-call inputs from every exchange except the latest (core/context.ts), which goes
+beyond the spec's "keep the last 6 exchanges verbatim".
+Runs so far in Phase 12 cost ≈ $0.43 total (ledger 365,201 of 800,000; 434,799 left).
+
+STOPPED: paid run 1b failed (cost cap). The fix is a core change (core is frozen since Phase 10), so it needs approval.
+Needed from you:
+1. Approve a small core change in core/context.ts: stop eliding tool-call inputs inside the 6-exchange window (keep
+   the spec's window verbatim, elide only older exchanges), and render elided inputs without a copyable placeholder
+   string (drop the large field and add `"_elided": "<N> chars, already applied"`), so the model has nothing to
+   imitate as content. Expected effect: no placeholder writes; somewhat higher per-turn tokens inside the window.
+2. Then approve one more claude greenfield run with the same caps (≤ 200k input ≈ ≤ $0.25). Alternatives: switch
+   `--driver claude` to Claude Sonnet 5.5 via HARNESS_CLAUDE_MODEL (≈ 3× the price per token; more reliable tool use;
+   MODEL_UPGRADE is "ask"), or keep Haiku.
+3. Budget check: 434,799 left; remaining plan = claude greenfield (≤200k) + openai greenfield (≤200k) + brownfield
+   (≤150k) + bench (≤150k) = ≤700k at caps → the 800k total no longer covers every run at its cap.

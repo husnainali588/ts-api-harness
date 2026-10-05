@@ -1,0 +1,5 @@
+test/routes/users.test.ts › (file failed to load)
+Cannot find module '../../src/routes/users.js' imported from /Users/husnainali/Claude Code/AGENT HARNESS/.harness/worktrees/20261005100426-810aa6/generated/user
+
+--- vitest stderr ---
+Command failed: /opt/homebrew/Cellar/node/26.10.0_1/bin/node /Users/husnainali/Claude Code/AGENT HARNESS/.harness/worktrees/20261005100426-810aa6/generated/users-api/node_modules/vitest/vitest.mjs run --reporter=json --outputFile=/Users/husnainali/Claude Code/AGENT HARNESS/.harness/runs/20261005100426-810aa6/vitest-8-1791194695389.json --passWithNoTests
