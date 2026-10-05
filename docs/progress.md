@@ -215,3 +215,14 @@ Result: DONE — commit "feat(core): ship step with G4 preconditions".
   closed with a comment and its remote branch deleted (evidence PRs come from Phase 12).
 - Found and fixed during the bare-repo test: a symlinked node_modules was staged when the target repo's .gitignore only
   had `node_modules/` → ship now excludes node_modules by pathspec regardless of .gitignore.
+
+## Phase 10 — freeze core, prove extensibility
+
+Plan:
+1. Core frozen from here (any core change = extension-point problem → ask).
+2. examples/extensions/: tool `openapi_diff` (+ two OpenAPI fixtures), rule `orm-explicit-columns` (Prisma
+   findMany/findFirst/findUnique without select; Drizzle select() without columns .from(users), query.users.findMany
+   without columns; fixture with one good, one bad query), linter rule `no-console-in-handlers` (+ fixture).
+3. scripts/extension-demo.sh: per example → copy into plugins/, `git add -N`, `git diff --stat`, assert only that
+   plugin folder changed and nothing under core/, run `harness plugins` + `harness check --api <fixture>`, remove.
+4. test/extensibility.test.ts: the same in a temp git copy. docs/extending.md: one section per plugin kind.

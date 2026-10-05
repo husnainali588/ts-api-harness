@@ -1,0 +1,16 @@
+{
+  "openapi": "3.1.0",
+  "info": { "title": "users", "version": "2" },
+  "paths": {
+    "/v1/users": {
+      "get": { "parameters": [{ "name": "tenant", "in": "query", "required": true }], "responses": { "200": { "description": "page" }, "422": { "description": "invalid" } } },
+      "post": { "responses": { "201": { "description": "created" } } }
+    },
+    "/v1/users/{id}": {
+      "get": { "parameters": [{ "name": "id", "in": "path", "required": true }], "responses": { "200": { "description": "ok" }, "404": { "description": "missing" } } }
+    },
+    "/v1/users/{id}/roles": {
+      "get": { "parameters": [{ "name": "id", "in": "path", "required": true }], "responses": { "200": { "description": "roles" } } }
+    }
+  }
+}
